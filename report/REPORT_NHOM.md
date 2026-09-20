@@ -1,107 +1,177 @@
 # Báo Cáo Nhóm — Lab 7: Embedding & Vector Store
 
-**Nhóm:** [Nhóm bổ sung]<br>
-**Thành viên:** [Nhóm bổ sung]<br>
+**Nhóm:** G-08
+**Thành viên:** Võ Huy Hoàng, Lê Trọng Khánh, [chưa có thông tin thành viên 3]
 **Ngày:** 20/09/2026
 
-## 1. Lựa chọn tài liệu
+> **Nộp 1 bản / nhóm.** Phần cá nhân (hướng tiếp cận, kết quả riêng, dự đoán…) mỗi thành viên nộp riêng trong `REPORT_CANHAN.md`. Chi tiết thang điểm: `docs/SCORING.md`.
 
-### Chủ đề và lý do chọn
+**Tổng điểm phần nhóm: 40** = Lựa chọn tài liệu (10) + Thiết kế chiến lược (15) + Chất lượng truy xuất (10) + Thuyết trình (5).
 
-**Chủ đề:** Chính sách trả hàng, hoàn tiền và tranh chấp hậu mãi trên các sàn thương mại điện tử.
+---
 
-Corpus gồm chính sách công khai từ Shopee và TikTok Shop. Chủ đề có các quy tắc thời hạn, điều kiện, bằng chứng và đối tượng buyer/seller rõ ràng, nên phù hợp để so sánh chunking, metadata filtering và grounded retrieval.
+## 1. Lựa chọn tài liệu (Document Set Quality) — Nhóm (10 điểm)
 
-### Danh sách tài liệu
+### Chủ đề (Domain) & Lý Do Chọn
 
-Character count là độ dài thực tế của toàn bộ file Markdown, bao gồm frontmatter.
+**Chủ đề:** Chính sách trả hàng, hoàn tiền và xử lý tranh chấp trên Shopee và TikTok Shop.
 
-| # | Tên tài liệu | Nguồn | Ngày lấy / phiên bản | Số ký tự | Metadata chính |
-|---|---|---|---|---:|---|
-| 1 | Quy trình Shopee xử lý yêu cầu trả hàng và hoàn tiền | https://help.shopee.vn/portal/4/article/190242 | 2026-09-20 / not-stated | 8693 | audience=both; category=return-process; language=vi |
-| 2 | Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền Shopee | https://help.shopee.vn/portal/4/article/79467 | 2026-09-20 / not-stated | 3865 | audience=buyer; category=return-evidence; language=vi |
-| 3 | Chính sách trả hàng và hoàn tiền Shopee | https://help.shopee.vn/portal/4/article/77251 | 2026-09-20 / effective-2026-03-11 | 20130 | audience=both; category=return-refund; language=vi |
-| 4 | Phương thức gửi hàng hoàn trả và phí hoàn trả Shopee | https://help.shopee.vn/portal/4/article/189477 | 2026-09-20 / not-stated | 6369 | audience=buyer; category=return-shipping; language=vi |
-| 5 | Nâng cấp tranh chấp hậu mãi trên TikTok Shop | https://seller-vn.tiktok.com/university/essay?knowledge_id=101756645132049 | 2026-09-20 / 2025-06-18 | 7740 | audience=seller; category=aftersales-dispute; language=vi |
-| 6 | Trả hàng do đổi ý trên TikTok Shop | https://seller-vn.tiktok.com/university/essay?knowledge_id=6988871880738576 | 2026-09-20 / 2026-08-21 | 9755 | audience=buyer; category=change-of-mind; language=vi |
-| 7 | Chính sách trả hàng và hoàn tiền TikTok Shop | https://seller-vn.tiktok.com/university/essay?knowledge_id=1766935302801169 | 2026-09-20 / 2026-08-21 | 20888 | audience=both; category=return-refund; language=vi |
-| 8 | Người bán gửi trả sản phẩm cho người mua trên TikTok Shop | https://seller-vn.tiktok.com/university/essay?knowledge_id=4041059496167184 | 2026-09-20 / 2026-08-20 | 5915 | audience=seller; category=seller-return; language=vi |
+**Tại sao nhóm chọn chủ đề này?**
 
-Các nguồn được `sources.csv` ghi là public-source và frontmatter của mọi document có `source_url`, `retrieved_at`, `document_version`.
+Đây là nhóm chính sách có nhiều điều kiện, thời hạn và trách nhiệm khác nhau theo nền tảng, đối tượng người mua/người bán nên phù hợp để kiểm tra retrieval(truy xuất) theo ngữ nghĩa và metadata(siêu dữ liệu). Các câu trả lời cũng có thể đối chiếu trực tiếp với nguồn công khai, giúp đánh giá rõ khả năng giữ ngữ cảnh của từng chiến lược chunking(chia đoạn).
 
-### Cấu trúc metadata
+### Danh sách tài liệu (Data Inventory)
 
-| Trường | Kiểu | Lợi ích retrieval |
-|---|---|---|
-| doc_id | string | Nhận diện nguồn gốc của mọi chunk, hỗ trợ delete và gold-rank. |
-| title | string | Hiển thị context dễ kiểm tra. |
-| source_url | URL string | Truy vết nguồn chính sách. |
-| retrieved_at | ISO date string | Ghi nhận thời điểm lấy dữ liệu. |
-| document_version | string | Phân biệt phiên bản/hiệu lực chính sách. |
-| audience | enum | Prefilter buyer, seller hoặc both. |
-| category | string | Phân biệt return, shipping, evidence và dispute. |
-| language | string | Cho phép giới hạn ngôn ngữ khi corpus mở rộng. |
+| # | Tên tài liệu | Nguồn (Source URL) | Ngày lấy / Phiên bản | Số ký tự | Metadata đã gán |
+|---|--------------|------------|--------------------|----------|-----------------|
+| 1 | Quy trình Shopee xử lý yêu cầu trả hàng và hoàn tiền | https://help.shopee.vn/portal/4/article/190242 | 20/09/2026 / không nêu phiên bản | 8.692 | `doc_id`, `audience`, `category`, `language`, nguồn và phiên bản |
+| 2 | Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền Shopee | https://help.shopee.vn/portal/4/article/79467 | 20/09/2026 / không nêu phiên bản | 3.864 | `doc_id`, `audience`, `category`, `language`, nguồn và phiên bản |
+| 3 | Chính sách trả hàng và hoàn tiền Shopee | https://help.shopee.vn/portal/4/article/77251 | 20/09/2026 / hiệu lực 11/03/2026 | 20.129 | `doc_id`, `audience`, `category`, `language`, nguồn và phiên bản |
+| 4 | Phương thức gửi hàng hoàn trả và phí hoàn trả Shopee | https://help.shopee.vn/portal/4/article/189477 | 20/09/2026 / không nêu phiên bản | 6.368 | `doc_id`, `audience`, `category`, `language`, nguồn và phiên bản |
+| 5 | Nâng cấp tranh chấp hậu mãi trên TikTok Shop | https://seller-vn.tiktok.com/university/essay?knowledge_id=101756645132049 | 20/09/2026 / 18/06/2025 | 7.744 | `doc_id`, `audience`, `category`, `language`, nguồn và phiên bản |
+| 6 | Trả hàng do đổi ý trên TikTok Shop | https://seller-vn.tiktok.com/university/essay?knowledge_id=6988871880738576 | 20/09/2026 / 21/08/2026 | 9.758 | `doc_id`, `audience`, `category`, `language`, nguồn và phiên bản |
+| 7 | Chính sách trả hàng và hoàn tiền TikTok Shop | https://seller-vn.tiktok.com/university/essay?knowledge_id=1766935302801169 | 20/09/2026 / 21/08/2026 | 20.891 | `doc_id`, `audience`, `category`, `language`, nguồn và phiên bản |
+| 8 | Người bán gửi trả sản phẩm cho người mua trên TikTok Shop | https://seller-vn.tiktok.com/university/essay?knowledge_id=4041059496167184 | 20/09/2026 / 20/08/2026 | 5.918 | `doc_id`, `audience`, `category`, `language`, nguồn và phiên bản |
 
-## 2. Thiết kế chiến lược
+**Danh sách kiểm tra quản trị dữ liệu (Data governance checklist):**
+- [x] Tập tài liệu (Corpus) chỉ chứa nguồn công khai/được phép dùng và không chứa dữ liệu cá nhân, thông tin đăng nhập hoặc tài liệu nội bộ.
+- [x] Mỗi tài liệu có `source_url`, `retrieved_at`, `document_version` (hoặc ngày hiệu lực) trong metadata.
 
-### Phân tích baseline
+### Cấu trúc Metadata (Metadata Schema)
 
-Các số liệu dưới đây lấy từ local run trong `ket_qua_benchmark_recursive.txt` với `chunk_size=500`.
+| Trường metadata | Kiểu | Ví dụ giá trị | Tại sao hữu ích cho truy xuất (retrieval)? |
+|----------------|------|---------------|-------------------------------|
+| `doc_id` | Chuỗi | `shopee-return-evidence` | Định danh tài liệu gốc và hỗ trợ xóa toàn bộ chunk của tài liệu. |
+| `title` | Chuỗi | `Chuẩn bị bằng chứng...` | Giải thích nội dung kết quả truy xuất cho người đọc. |
+| `source_url` | URL | `https://help.shopee.vn/...` | Truy vết và kiểm chứng câu trả lời với nguồn gốc. |
+| `retrieved_at` | Ngày | `2026-09-20` | Kiểm tra thời điểm dữ liệu được thu thập. |
+| `document_version` | Chuỗi/ngày | `2025-06-18` hoặc `not-stated` | Theo dõi phiên bản hoặc ngày hiệu lực của chính sách. |
+| `audience` | Chuỗi | `buyer`, `seller`, `both` | Lọc chính sách dành cho đúng người mua hoặc người bán. |
+| `category` | Chuỗi | `return-evidence` | Thu hẹp kết quả theo loại chính sách hoặc nghiệp vụ. |
+| `language` | Chuỗi | `vi` | Xác định ngôn ngữ tài liệu và mô hình embedding phù hợp. |
 
-| Tài liệu | Strategy | Count | Avg length |
-|---|---|---:|---:|
-| shopee-return-evidence | fixed_size | 8 | 477.38 |
-| shopee-return-evidence | by_sentences | 12 | 286.08 |
-| shopee-return-evidence | recursive | 9 | 383.00 |
-| shopee-return-refund-policy | fixed_size | 44 | 494.68 |
-| shopee-return-refund-policy | by_sentences | 43 | 453.44 |
-| shopee-return-refund-policy | recursive | 54 | 360.98 |
-| tiktok-aftersales-disputes | fixed_size | 17 | 474.53 |
-| tiktok-aftersales-disputes | by_sentences | 13 | 555.69 |
-| tiktok-aftersales-disputes | recursive | 17 | 425.53 |
+---
 
-`HeadingRecursiveChunker` đã được thêm như một strategy section-aware: heading Markdown hoặc section đánh số được đưa vào mọi child chunk của section dài. Mapping giữa strategy và từng thành viên chưa có dữ liệu, nên không tự gán tên hoặc điểm cho thành viên.
+## 2. Thiết kế chiến lược (Strategy Design) — Nhóm (15 điểm)
 
-### Chiến lược của Bùi Quang Vinh — HeadingRecursiveChunker
+> Mỗi thành viên thử **một chiến lược khác nhau** trên cùng bộ tài liệu; nhóm tổng hợp và so sánh ở đây.
 
-Chiến lược của Bùi Quang Vinh là **Heading/Section-aware Recursive Chunking** với `chunk_size=500`. Strategy nhận diện Markdown headings và numbered sections; section nhỏ giữ heading cùng body, còn section lớn dùng `RecursiveChunker` cho body và prepend heading vào từng child chunk. Cách này giữ ngữ cảnh semantic của section policy và phù hợp với corpus ecommerce thường chia theo điều kiện, quy trình, bước xử lý, thời hạn và trường hợp ngoại lệ.
+### Phân tích đường cơ sở (Baseline Analysis)
 
-Kết quả local embedding thực tế trong `benchmark_evidence_all.txt`:
+Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 
-| Strategy | Chunks | Document@1 | Document@3 | Evidence@1 | Evidence@3 | Score |
-|---|---:|---:|---:|---:|---:|---:|
-| Fixed | 177 | 3/5 | 3/5 | 0/5 | 0/5 | 0/10 |
-| Sentence | 157 | 2/5 | 3/5 | 0/5 | 0/5 | 0/10 |
-| Recursive | 197 | 2/5 | 3/5 | 0/5 | 1/5 | 1/10 |
-| HeadingRecursiveChunker | 232 | 4/5 | 4/5 | 1/5 | 3/5 | 4/10 |
+| Tài liệu | Chiến lược (Strategy) | Số lượng Chunk | Độ dài trung bình | Giữ được ngữ cảnh không? |
+|-----------|----------|-------------|------------|-------------------|
+| `shopee-return-evidence` | FixedSizeChunker (`fixed_size`) | 8 | 477,38 | Khá; có overlap nhưng có thể cắt giữa câu. |
+| `shopee-return-evidence` | SentenceChunker (`by_sentences`) | 12 | 286,08 | Tốt; giữ nguyên ranh giới câu. |
+| `shopee-return-evidence` | RecursiveChunker (`recursive`) | 9 | 385,44 | Tốt; ưu tiên ranh giới đoạn/câu. |
+| `shopee-return-refund-policy` | FixedSizeChunker (`fixed_size`) | 44 | 494,68 | Khá; ổn định về kích thước nhưng có thể tách điều khoản. |
+| `shopee-return-refund-policy` | SentenceChunker (`by_sentences`) | 48 | 405,79 | Tốt; giữ câu đầy đủ nhưng đôi khi mất liên kết với tiêu đề. |
+| `shopee-return-refund-policy` | RecursiveChunker (`recursive`) | 71 | 276,28 | Tốt; chunk mạch lạc hơn nhưng số lượng lớn. |
+| `tiktok-aftersales-disputes` | FixedSizeChunker (`fixed_size`) | 17 | 474,94 | Khá; kích thước đồng đều. |
+| `tiktok-aftersales-disputes` | SentenceChunker (`by_sentences`) | 14 | 516,36 | Tốt với văn xuôi; một số chunk vượt 500 ký tự. |
+| `tiktok-aftersales-disputes` | RecursiveChunker (`recursive`) | 17 | 427,88 | Tốt; giữ được ranh giới tự nhiên tương đối. |
 
-Trong benchmark này, Heading đạt các chỉ số nêu trên; bảng không suy diễn rằng strategy này sẽ luôn tốt nhất ngoài corpus và query hiện tại.
+### Chiến lược của từng thành viên
 
-## 3. Câu hỏi đánh giá
+> Mỗi thành viên điền một khối dưới đây (copy thêm nếu nhóm có nhiều hơn 3 người).
 
-| # | Query | Gold answer (tóm tắt) | Gold document / evidence |
-|---|---|---|---|
-| 1 | Hoàn Tiền Ngay và Trả hàng & Hoàn tiền khác nhau thế nào? | Hoàn Tiền Ngay không cần trả hàng; trả hàng cần gửi về trong 6 ngày. | shopee-request-processing; “Hoàn Tiền Ngay”, “vòng 6 ngày” |
-| 2 | Trả một phần đơn Shopee có hoàn phí ship ban đầu không? | Không hoàn phí ship ban đầu. | shopee-return-shipping-fees; “phí vận chuyển ban đầu”, “không được hoàn lại” |
-| 3 | Buyer Shopee cần bằng chứng gì khi hàng lỗi/khác mô tả? | Video mở kiện liên tục, rõ tình trạng hàng và vận đơn. | shopee-return-evidence; “video mở kiện hàng”, “liên tục” |
-| 4 | Seller TikTok phải khắc phục trong bao lâu? | Trong 48 giờ; ví dụ hoàn tiền hoặc đổi sản phẩm. | tiktok-aftersales-disputes; “48 giờ”, “hoàn tiền cho khách hàng hoặc đổi sản phẩm” |
-| 5 | Seller TikTok gửi trả sản phẩm trong bao lâu và làm gì? | Trong 1 ngày làm việc, đóng gói/gắn nhãn/gửi có mã vận đơn. | tiktok-seller-to-customer-returns; “1 ngày làm việc”, “mã vận đơn” |
+**Thành viên 1 — Võ Huy Hoàng**
+- **Loại chiến lược:** `FixedSizeChunker` (chia đoạn theo kích thước cố định), với `chunk_size=500` và `overlap=50`.
+- **Mô tả & lý do chọn cho chủ đề này:** Tôi chọn kích thước cố định để kiểm soát lượng văn bản đầu vào của mỗi embedding(vectơ nhúng) và giữ cách xử lý nhất quán giữa 8 tài liệu chính sách Shopee, TikTok Shop. Phần chồng lặp 50 ký tự giúp hạn chế mất thông tin tại ranh giới chunk(đoạn văn bản), nhưng chiến lược vẫn có thể cắt giữa câu hoặc giữa một điều khoản.
+- **Cấu hình đánh giá:** `top_k=3`, Gemini `gemini-embedding-001`; tổng cộng 22 chunk.
+- **Kết quả:** `Gold@1 = 5/5`, `Gold@3 = 5/5`, điểm truy xuất tài liệu `10/10`. Cả 5 câu hỏi đều truy xuất đúng tài liệu ở vị trí top-1.
+- **Code snippet:** Không có mã tùy chỉnh; sử dụng lớp có sẵn như sau:
+```python
+chunker = FixedSizeChunker(chunk_size=500, overlap=50)
+```
 
-### Metadata filter analysis
+**Thành viên 2 — Lê Trọng Khánh**
+- **Loại chiến lược:** `SentenceChunker` (chia đoạn theo câu), với `max_sentences_per_chunk=5`.
+- **Mô tả & lý do chọn:** Chiến lược tách tại khoảng trắng sau dấu `.`, `!`, `?`, giữ lại dấu câu và gom tối đa 5 câu trong mỗi chunk(đoạn văn bản). Cách này giữ câu nguyên vẹn khi đọc điều khoản và yêu cầu bằng chứng, đồng thời giảm tình trạng cắt ngang câu so với `FixedSizeChunker` (chia đoạn theo kích thước cố định).
+- **Cấu hình đánh giá:** `top_k=3`, Gemini `gemini-embedding-001`; 8 tài liệu tạo thành 100 chunk.
+- **Kết quả:** `Gold@1 = 4/5`, `Gold@3 = 5/5`, điểm truy xuất tài liệu `9/10`. Câu Q1 truy xuất đúng tài liệu ở top-2; bốn câu còn lại truy xuất đúng tài liệu ở top-1.
+- **Hạn chế:** Chữ viết tắt có thể gây tách sai; danh sách không có dấu kết thúc câu có thể tạo chunk dài; tiêu đề không tự được gắn lại vào mọi chunk.
+- **Code snippet:** Không có mã tùy chỉnh; sử dụng lớp có sẵn như sau:
+```python
+chunker = SentenceChunker(max_sentences_per_chunk=5)
+```
 
-Kết quả local document-level hiện có cho Q3 cho thấy filter `{"audience": "buyer"}` cải thiện gold document từ **not found** ở unfiltered thành **rank 1** ở filtered. Đây là bằng chứng A/B về việc audience filter loại bớt semantic overlap từ tài liệu TikTok.
+**Thành viên 3 — [Tên]**
+- **Loại chiến lược:**
+- **Mô tả & lý do chọn:**
+- **Code snippet (nếu custom):**
 
-Tuy nhiên, Q2 và Q4 hiện dùng filter `platform` trong `bench.py`, còn frontmatter corpus không có trường `platform`; filtered search trả về rỗng. Đây là một failure configuration có thể kiểm chứng, không phải kết luận rằng metadata filtering luôn gây hại. Nếu corpus được mở rộng, metadata `platform` kết hợp `audience` và `category` có thể tách policy Shopee/TikTok tốt hơn, nhưng corpus hiện tại không được sửa tự động.
+### So Sánh Giữa Các Thành Viên
 
-### Failure case và chất lượng dữ liệu
+| Thành viên | Chiến lược (Strategy) | Điểm truy xuất (/10) | Điểm mạnh | Điểm yếu |
+|-----------|----------|----------------------|-----------|----------|
+| Võ Huy Hoàng | `FixedSizeChunker(500, overlap=50)` | 10/10 | Cấu hình đơn giản, số lượng chunk dễ kiểm soát; overlap giúp giữ thông tin gần ranh giới; cả 5 tài liệu đúng đều đứng top-1. | Có thể cắt giữa câu hoặc giữa điều khoản, làm giảm tính mạch lạc của chunk. |
+| Lê Trọng Khánh | `SentenceChunker(max_sentences_per_chunk=5)` | 9/10 | Giữ câu nguyên vẹn, dễ đọc và giảm cắt ngang điều khoản; cả 5 tài liệu đúng đều xuất hiện trong top-3. | Có thể tách sai chữ viết tắt, tạo chunk dài với danh sách thiếu dấu câu và làm mất liên kết với tiêu đề. |
+| | | | | |
 
-`ket_qua_benchmark_recursive.txt` cho Q5 đưa `tiktok-aftersales-disputes` lên top-1 (0.809734), còn gold document `tiktok-seller-to-customer-returns` ở rank 3 (0.743054). Lý do hợp lý là hai tài liệu đều nói về seller, tranh chấp và hành động sau bán hàng; `audience=seller` chưa đủ phân biệt mục đích gửi trả cụ thể.
+**Chiến lược nào tốt nhất cho chủ đề này? Tại sao?**
 
-`data_quality_notes.txt` cũng ghi nhận UI/navigation noise trong các file TikTok (ví dụ Thai/Indonesian navigation text, table of contents, feedback/footer). Những token này có thể làm giảm precision và nên được làm sạch trong một bước quản trị dữ liệu riêng, không thay đổi source hiện tại.
+Theo kết quả hiện có của hai thành viên, `FixedSizeChunker` của Võ Huy Hoàng tốt nhất về điểm truy xuất với 10/10 và đưa đúng tài liệu lên top-1 ở cả 5 câu, trong khi `SentenceChunker` đạt 9/10 do Q1 chỉ đứng top-2. Tuy vậy, `SentenceChunker` tạo các đoạn dễ đọc hơn; kết luận cuối cùng cần bổ sung kết quả của thành viên 3 dùng chiến lược theo heading(tiêu đề/mục) trước khi khẳng định chiến lược tốt nhất cho toàn nhóm.
 
-## 4. Phần cần nhóm xác nhận
+---
 
-- [Nhóm bổ sung] tên nhóm và danh sách thành viên.
-- [Nhóm bổ sung] mapping strategy thực tế của từng thành viên và so sánh giữa các thành viên.
-- [Nhóm bổ sung] insight sau demo và self-assessment.
-- Evidence-level strategy table chỉ được điền từ `benchmark_evidence_all.txt` sau local run hoàn tất; không dùng mock score làm kết quả semantic của nhóm.
+## 3. Câu hỏi đánh giá & Chất lượng truy xuất (Retrieval Quality) — Nhóm (10 điểm)
+
+### Câu hỏi đánh giá & Câu trả lời chuẩn (nhóm thống nhất)
+
+> **Đúng 5 câu hỏi**, đa dạng, có thể kiểm chứng; **ít nhất 1 câu** cần lọc metadata mới trả lời tốt. Đây là bộ câu hỏi chung cho mọi thành viên chạy.
+
+| # | Câu hỏi (Query) | Câu trả lời chuẩn (Gold Answer) | Chunk nào chứa thông tin? |
+|---|-------|-------------------------------|--------------------------|
+| 1 | Khi Shopee chấp nhận yêu cầu, Hoàn Tiền Ngay và Trả hàng & Hoàn tiền khác nhau như thế nào? | Hoàn Tiền Ngay không yêu cầu người mua trả hàng; với Trả hàng & Hoàn tiền, người mua phải chọn phương thức trả hàng và gửi hàng về kho Shopee hoặc người bán trong vòng 6 ngày từ khi nhận thông báo. | `shopee-request-processing` |
+| 2 | Shopee có hoàn phí vận chuyển ban đầu khi người mua chỉ trả lại một số sản phẩm trong đơn không? | Không. Phí ban đầu chỉ được hoàn khi yêu cầu áp dụng cho toàn bộ sản phẩm và toàn bộ giá trị đã thanh toán được hoàn. | `shopee-return-shipping-fees` |
+| 3 | Người mua Shopee nên chuẩn bị những bằng chứng nào khi sản phẩm bị lỗi, hư hỏng hoặc khác mô tả? | Quay/chụp toàn bộ kiện hàng, thông tin vận chuyển và niêm phong; video mở kiện phải liên tục, thể hiện quá trình mở gói, tình trạng và lỗi của sản phẩm. | `shopee-return-evidence` |
+| 4 | Nếu TikTok Shop quyết định có lợi cho khách hàng trong tranh chấp hậu mãi, người bán phải khắc phục trong bao lâu? | Trong vòng 48 giờ; có thể hoàn tiền hoặc thay sản phẩm và chịu phí vận chuyển nếu có. | `tiktok-aftersales-disputes` |
+| 5 | Sau khi nhân viên chăm sóc khách hàng TikTok Shop liên hệ, người bán có bao lâu và phải làm gì để gửi trả sản phẩm? | Có 1 ngày làm việc để đóng gói an toàn, gắn nhãn và gửi qua đơn vị vận chuyển tiết kiệm có mã theo dõi. | `tiktok-seller-to-customer-returns` |
+
+### Tổng hợp chất lượng truy xuất của nhóm
+
+> Cách chấm (theo `docs/SCORING.md`): **2 điểm/câu** — top-3 chứa chunk liên quan + agent trả lời đúng (2), có liên quan nhưng thiếu/không ở top-1 (1), không có trong top-3 (0).
+
+| # | Câu hỏi | Chiến lược tốt nhất cho câu này | Có chunk liên quan trong top-3? | Ghi chú |
+|---|---------|-------------------------------|-------------------------------|---------|
+| 1 | Phân biệt hai phương án hoàn tiền Shopee | FixedSize | Có | FixedSize: top-1; Sentence: top-2. |
+| 2 | Hoàn phí vận chuyển khi trả một phần đơn hàng | FixedSize và Sentence | Có | Cả hai đều đưa đúng tài liệu lên top-1. |
+| 3 | Bằng chứng cho sản phẩm lỗi/khác mô tả | FixedSize và Sentence | Có | Cả hai đều đưa đúng tài liệu lên top-1. |
+| 4 | Thời hạn khắc phục tranh chấp TikTok Shop | FixedSize và Sentence | Có | Cả hai đều đưa đúng tài liệu lên top-1. |
+| 5 | Thời hạn và cách người bán gửi trả sản phẩm | FixedSize và Sentence | Có | Cả hai đều đưa đúng tài liệu lên top-1. |
+
+**Lọc bằng metadata có giúp ích không? Ở câu hỏi nào?**
+
+Có, rõ nhất ở Q3 trong benchmark FixedSize: bộ lọc `audience=buyer` đưa tài liệu chuẩn từ top-2 lên top-1 bằng cách loại các tài liệu không dành riêng cho người mua. Ở Q1 và Q5, tài liệu đúng vốn đã ở top-1 nên bộ lọc không đổi thứ hạng, nhưng vẫn giảm tập ứng viên sai đối tượng; benchmark Sentence cũng không ghi nhận thay đổi thứ hạng ở các câu có lọc.
+
+---
+
+## 4. Thuyết trình (Demo) & Bài học nhóm — Nhóm (5 điểm)
+
+**Những phân tích (insights) hay nhất nhóm sẽ trình bày:**
+
+- `FixedSizeChunker` đạt 10/10 dù có nguy cơ cắt giữa câu, cho thấy embedding(vectơ nhúng) đa ngữ và overlap(độ chồng lặp) có thể bù một phần hạn chế về ranh giới đoạn.
+- `SentenceChunker` giữ nội dung dễ đọc hơn nhưng tạo 100 chunk và Q1 chỉ đứng top-2; chunk mạch lạc không tự động bảo đảm thứ hạng truy xuất cao hơn.
+- Metadata filtering(lọc siêu dữ liệu) hữu ích khi corpus có nội dung gần giống nhau cho người mua và người bán; ở Q3, bộ lọc đã cải thiện hạng tài liệu chuẩn từ 2 lên 1 trong benchmark FixedSize.
+
+**Bài học rút ra khi so sánh trong nhóm:**
+
+Trên cùng 8 tài liệu và 5 câu hỏi, hai chiến lược đều đạt Gold@3 = 5/5 nhưng khác Gold@1: FixedSize đạt 5/5 còn Sentence đạt 4/5. Kết quả cho thấy cần đánh giá đồng thời độ chính xác truy xuất và tính mạch lạc của chunk; số lượng chunk nhiều hơn hoặc câu nguyên vẹn hơn không nhất thiết tạo kết quả xếp hạng tốt hơn.
+
+**Nếu làm lại, nhóm sẽ thay đổi gì trong chiến lược dữ liệu (data strategy)?**
+
+Nhóm sẽ làm sạch phần menu, nội dung lặp và lời dẫn không liên quan trước khi chunk, đồng thời thử chiến lược theo heading(tiêu đề/mục) để gắn tiêu đề điều khoản vào từng đoạn. Nhóm cũng sẽ chuẩn hóa metadata, tách rõ tài liệu `buyer` và `seller`, rồi chạy A/B test(so sánh hai cấu hình) có và không có bộ lọc trên toàn bộ 5 câu hỏi.
+
+---
+
+## Tự Đánh Giá (Phần Nhóm)
+
+| Tiêu chí | Điểm tự đánh giá |
+|----------|-------------------|
+| Lựa chọn tài liệu (Document Set Quality) | / 10 |
+| Thiết kế chiến lược (Strategy Design) | / 15 |
+| Chất lượng truy xuất (Retrieval Quality) | / 10 |
+| Thuyết trình (Demo) | / 5 |
+| **Tổng phần nhóm** | **/ 40** |
