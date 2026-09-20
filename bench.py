@@ -45,7 +45,7 @@ BENCHMARK_QUERIES = [
         "query": "Người mua Shopee có thể gửi yêu cầu trả hàng hoặc hoàn tiền trong bao lâu kể từ khi đơn hàng được giao thành công?",
         "gold_doc_ids": ["shopee-return-refund-policy"],
         "gold_answer": "Thông thường là 15 ngày kể từ lúc đơn hàng được cập nhật giao thành công; riêng thực phẩm tươi sống và đông lạnh là 24 giờ.",
-        "metadata_filter": {"audience": "buyer"},
+        "metadata_filter": {"audience": "both"},
     },
     {
         "id": "Q2",
