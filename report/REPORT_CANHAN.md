@@ -1,129 +1,69 @@
 # Báo Cáo Cá Nhân — Lab 7: Embedding & Vector Store
 
-**Họ tên:** Bùi Quang Vinh
-**Nhóm:** [Tên nhóm]
+**Họ tên:** Bùi Quang Vinh<br>
+**Nhóm:** [Nhóm bổ sung]<br>
 **Ngày:** 20/09/2026
 
-> **Nộp 1 bản / sinh viên.** Phần nhóm (lựa chọn tài liệu, thiết kế chiến lược, bộ câu hỏi đánh giá, demo) nộp chung 1 bản trong `REPORT_NHOM.md`. Chi tiết thang điểm: `docs/SCORING.md`.
+## 1. Khởi động
 
-**Tổng điểm phần cá nhân: 60** = Khởi động (5) + Hướng tiếp cận (10) + Hoàn thiện code (30) + Dự đoán độ tương tự (5) + Kết quả truy xuất của tôi (10).
+Cosine similarity đo góc giữa hai vector thay vì độ lớn của vector. Với text embeddings, hướng của vector thường phản ánh tốt hơn mức độ gần nhau về ngữ nghĩa; vì vậy cosine phù hợp hơn Euclidean distance khi độ lớn embedding không mang ý nghĩa chính.
 
----
+Với tài liệu 10.000 ký tự, `chunk_size=500`, `overlap=50`, số chunk là `ceil((10000 - 50) / (500 - 50)) = 23`. Nếu overlap tăng thành 100 thì số chunk là `ceil(9900 / 400) = 25`; ngữ cảnh ở ranh giới được giữ tốt hơn nhưng cần nhiều embedding và lưu trữ hơn.
 
-## 1. Khởi động (Warm-up) — Cá nhân (5 điểm)
+## 2. Hướng tiếp cận của tôi
 
-### Độ tương tự Cosine (Cosine Similarity) (Bài tập 1.1)
+`SentenceChunker.chunk()` dùng regex để tìm ranh giới câu, giữ dấu câu và nhóm tối đa `max_sentences_per_chunk` câu. `RecursiveChunker` ưu tiên ngắt theo đoạn, dòng, câu, khoảng trắng, sau đó hard-split khi hết separator; các mảnh nhỏ liền kề được ghép lại nếu vẫn nằm trong giới hạn kích thước.
 
-**Độ tương tự cosine cao (High cosine similarity) nghĩa là gì?**
-> *Viết 1-2 câu:* Cosine similarity cao nghĩa là hai vector embedding có hướng gần giống nhau, thường cho thấy hai đoạn văn có nội dung/ngữ nghĩa tương tự. Tập trung vào hướng của vector hơn là độ lớn, nên phù hợp để so sánh text embedding.
+`EmbeddingStore.add_documents()` chuyển `content` của mỗi `Document` thành embedding qua `embedding_fn`, rồi lưu `id`, `content`, bản sao `metadata`, và embedding vào in-memory store. Khi search, query cũng được embed, tính dot product với các vector đã lưu, sắp xếp giảm dần theo score và lấy top-k.
 
-**Ví dụ có độ tương tự CAO:**
-- Câu A: Khách hàng có thể hoàn trả sản phẩm trong vòng 7 ngày.
-- Câu B: Người mua được phép trả lại hàng trong thời hạn 7 ngày.
-- Tại sao tương đồng: khác từ vựng nhưng gần như cùng ý nghĩa
+`search_with_filter()` lọc các candidate theo toàn bộ key/value trong metadata trước khi similarity search, nên document ngoài phạm vi không chiếm vị trí top-k. `delete_document()` bỏ mọi record có `metadata["doc_id"]` trùng với document cần xóa.
 
-**Ví dụ có độ tương tự THẤP:**
-- Câu A: Người mua có thể yêu cầu hoàn tiền cho đơn hàng bị lỗi.
-- Câu B: Người bán phải cập nhật số lượng tồn kho của sản phẩm.
-- Tại sao khác: Khác nhau về ngữ nghĩa: một câu nói về refund của buyer, câu kia nói về inventory của seller.
+`KnowledgeBaseAgent.answer()` retrieve top-k chunk, tạo context có `title`, `doc_id`, `source_url`, sau đó inject context và question vào grounded prompt. Prompt yêu cầu chỉ dùng context, nói rõ khi thiếu thông tin và không tự tạo facts. Hàm hiện hỗ trợ `metadata_filter` nhưng vẫn tương thích với `agent.answer("question")`.
 
-**Tại sao độ tương tự cosine (cosine similarity) được ưu tiên hơn khoảng cách Euclid (Euclidean distance) cho text embeddings?**
-> *Viết 1-2 câu:* Vì  cosine tập trung vào hướng của vector hơn là độ lớn, nên phù hợp để so sánh text embedding. Euclid chỉ tập chung về độ lớn giữa 2 vector embedding nên chưa thể hiện được về ngữ nghĩa.
+## 3. Hoàn thiện code
 
-### Bài toán tính toán Chunking (Bài tập 1.2)
+Kết quả đầy đủ nằm trong `pytest_output.txt`.
 
-**Tài liệu 10,000 ký tự, chunk_size=500, overlap=50. Bao nhiêu chunks?**
-> *Trình bày phép tính:* ceil((10000−50)/(500−50))=ceil(9950/450)=23
-> *Đáp án:* 23
-
-**Nếu độ chồng chéo (overlap) tăng lên 100, số lượng chunk thay đổi thế nào? Tại sao muốn độ chồng chéo nhiều hơn?**
-> ceil((10000−100)/(500−100))=ceil(9900/400)=25
-> *Viết 1-2 câu:* Vậy **23 chunks → 25 chunks**. Overlap lớn hơn giúp giữ context ở ranh giới giữa hai chunk, nhưng đổi lại số chunk tăng, tốn embedding/storage/retrieval hơn.
-
----
-
-## 2. Hướng tiếp cận của tôi (My Approach) — Cá nhân (10 điểm)
-
-Giải thích cách tiếp cận của bạn khi lập trình (implement) các phần chính trong gói `src`.
-
-### Các hàm chia nhỏ (Chunking Functions)
-
-**`SentenceChunker.chunk`** — hướng tiếp cận:
-> Sử dụng regex để xác định ranh giới câu mà không loại bỏ dấu câu, sau đó nhóm các câu liên tiếp thành từng chunk với giới hạn `max_sentences_per_chunk`. Với input rỗng, hàm trả về danh sách rỗng. Một hạn chế là các chữ viết tắt như “TS.” hoặc số thập phân có thể bị nhận diện nhầm là điểm kết thúc câu.
-
-**`RecursiveChunker.chunk` / `_split`** — hướng tiếp cận:
-> Ưu tiên chia văn bản theo các separator mang nhiều ngữ nghĩa nhất như đoạn văn và dòng mới, sau đó mới chuyển xuống câu và khoảng trắng. Nếu một đoạn vẫn vượt `chunk_size`, `_split()` tiếp tục gọi đệ quy với separator tiếp theo. Khi không còn separator, dùng hard split làm base case và sau đó ghép các mảnh nhỏ liền kề để tránh sinh quá nhiều chunk vụn.
-
-### Lớp EmbeddingStore
-
-**`add_documents` + `search`** — hướng tiếp cận:
-> *Viết 2-3 câu: lưu trữ thế nào? Tính độ tương tự ra sao?*
-
-**`search_with_filter` + `delete_document`** — hướng tiếp cận:
-> *Viết 2-3 câu: lọc (filter) trước hay sau? Xóa bằng cách nào?*
-
-### Tác tử KnowledgeBaseAgent
-
-**`answer`** — hướng tiếp cận:
-> *Viết 2-3 câu: cấu trúc prompt? Cách đưa ngữ cảnh (inject context) vào thế nào?*
-
----
-
-## 3. Hoàn thiện code (Core Implementation) — Cá nhân (30 điểm)
-
-Vượt qua bộ kiểm thử là điều kiện tính điểm phần này.
-
-### Kết Quả Kiểm Thử (Test Results)
-
-```
-# Dán kết quả (output) của: pytest tests/ -v
+```text
+======================== 42 passed, 1 warning in 0.06s ========================
 ```
 
-**Số lượng bài test vượt qua (pass):** __ / 42
+**Số lượng bài test vượt qua:** 42 / 42
 
----
+## 4. Dự đoán độ tương tự
 
-## 4. Dự đoán độ tương tự (Similarity Predictions) — Cá nhân (5 điểm)
+Kết quả dưới đây lấy từ `similarity_results.txt`, chạy với `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` và threshold thực nghiệm 0.55. Threshold này chỉ là quy ước cho experiment, không phải ngưỡng semantic phổ quát.
 
 | Cặp | Câu A | Câu B | Dự đoán | Điểm thực tế | Đúng? |
-|------|-----------|-----------|---------|--------------|-------|
-| 1 | | | cao / thấp | | |
-| 2 | | | cao / thấp | | |
-| 3 | | | cao / thấp | | |
-| 4 | | | cao / thấp | | |
-| 5 | | | cao / thấp | | |
+|---|---|---|---|---:|---|
+| 1 | Người mua có thể trả hàng trong vòng 15 ngày. | Khách hàng được phép hoàn trả sản phẩm trong thời hạn 15 ngày. | cao | 0.920097 | Có |
+| 2 | Người bán phải phản hồi yêu cầu hoàn tiền. | Seller cần phản hồi tranh chấp của khách hàng. | cao | 0.808946 | Có |
+| 3 | Sản phẩm bị lỗi có thể được hoàn tiền. | Hàng hư hỏng có thể đủ điều kiện trả lại. | cao | 0.622157 | Có |
+| 4 | Người mua yêu cầu hoàn tiền. | Người bán cập nhật tồn kho. | thấp | 0.574397 | Không |
+| 5 | TikTok xử lý tranh chấp hậu mãi. | Shopee quy định phí vận chuyển trả hàng. | thấp | 0.104147 | Có |
 
-**Kết quả nào bất ngờ nhất? Điều này nói gì về cách embeddings biểu diễn ý nghĩa?**
-> *Viết 2-3 câu:*
+Kết quả bất ngờ nhất là cặp 4: hai câu vẫn vượt threshold dù chủ thể và tác vụ khác nhau. Điều này cho thấy cùng ngữ cảnh marketplace/hoàn tiền có thể làm embedding gần nhau; vì vậy threshold đơn lẻ không đủ để khẳng định hai câu đồng nghĩa.
 
----
+## 5. Kết quả truy xuất của tôi
 
-## 5. Kết quả truy xuất của tôi (Competition Results) — Cá nhân (10 điểm)
+`ket_qua_benchmark_recursive.txt` là benchmark document-level đã có trong repo, chạy với local embedding và recursive chunking. Bảng này không gọi document hit là evidence hit. `bench_evidence.py` đã được bổ sung để đánh giá nghiêm ngặt evidence/chunk-level; kết quả local mới phải được chạy lại trong môi trường có `sentence-transformers` trước khi thay thế các ghi chú evidence chưa xác định dưới đây.
 
-Chạy **5 câu hỏi đánh giá của nhóm** trên mã nguồn cá nhân của bạn trong gói `src`. **5 câu hỏi này phải trùng với các thành viên cùng nhóm** (xem `REPORT_NHOM.md`).
+| # | Query | Top-1 chunk | Score | Document-level result | Agent answer |
+|---|---|---|---:|---|---|
+| 1 | So sánh Hoàn Tiền Ngay và Trả hàng & Hoàn tiền | `shopee-return-shipping-fees`, không phải gold doc | 0.628361 | Gold doc không ở top-3 | Not evaluated with a generation LLM |
+| 2 | Hoàn phí vận chuyển ban đầu khi trả một phần đơn | Không có candidate vì filter `platform=shopee` không có trong frontmatter | — | Gold doc không tìm thấy | Not evaluated with a generation LLM |
+| 3 | Bằng chứng Shopee cho hàng lỗi/khác mô tả | `shopee-return-evidence` | 0.715370 | Gold doc rank 1; A/B unfiltered: not found, filtered: rank 1 | Not evaluated with a generation LLM |
+| 4 | Hành động khắc phục TikTok trong 48 giờ | Không có candidate vì filter `platform=tiktok_shop` không có trong frontmatter | — | Gold doc không tìm thấy sau filter | Not evaluated with a generation LLM |
+| 5 | Người bán TikTok gửi trả hàng cho người mua | `tiktok-aftersales-disputes`, không phải gold doc | 0.809734 | Gold doc ở rank 3 | Not evaluated with a generation LLM |
 
-| # | Câu hỏi (Query) | Top-1 Chunk truy xuất được (tóm tắt) | Điểm Score | Có liên quan không? (Relevant) | Câu trả lời của Agent (tóm tắt) |
-|---|-------|--------------------------------|-------|-----------|------------------------|
-| 1 | | | | | |
-| 2 | | | | | |
-| 3 | | | | | |
-| 4 | | | | | |
-| 5 | | | | | |
+Document-level summary hiện có là Gold@1 = 1/5, Gold@3 = 2/5, document retrieval score = 3/10. Đây không phải final retrieval quality: agent generation chưa được đánh giá bằng LLM thật, và evidence-level score cần lấy từ `bench_evidence.py` với local backend.
 
-**Bao nhiêu câu hỏi trả về chunk có liên quan trong top-3?** __ / 5
+## Tự đánh giá
 
-**Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
-> *Viết 2-3 câu:*
-
----
-
-## Tự Đánh Giá (Phần Cá Nhân)
-
-| Tiêu chí | Điểm tự đánh giá |
-|----------|-------------------|
-| Khởi động (Warm-up) | / 5 |
-| Hướng tiếp cận của tôi (My Approach) | / 10 |
-| Hoàn thiện code (Core Implementation — tests) | / 30 |
-| Dự đoán độ tương tự (Similarity Predictions) | / 5 |
-| Kết quả truy xuất của tôi (Competition Results) | / 10 |
-| **Tổng phần cá nhân** | **/ 60** |
+| Tiêu chí | Trạng thái |
+|---|---|
+| Khởi động | Hoàn thành phần giải thích và tính chunking |
+| Hướng tiếp cận | Hoàn thành dựa trên implementation |
+| Core implementation | 42 / 42 tests passed |
+| Similarity predictions | 4 / 5 dự đoán đúng theo threshold 0.55 |
+| Agent generation evaluation | Chưa đánh giá với generation LLM thật |

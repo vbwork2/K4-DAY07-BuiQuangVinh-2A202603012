@@ -1,0 +1,10 @@
+Data quality observations
+
+This file records source artifacts only. The corpus content was not modified.
+
+- tiktok-aftersales-disputes.md contains Thai and Indonesian navigation text, including "ก่อนหน้า", "ถัดไป", "Daftar isi", and a closing "×" control.
+- tiktok-change-of-mind.md contains Thai/Indonesian navigation text, including "เนื้อหาด้านบนมีประโยชน์หรือไม่", "ก่อนหน้า", "Berikutnya", "สารบัญ", and a closing "×" control.
+- tiktok-returns-refunds.md contains page-feedback, next-article, table-of-contents, and closing-control text near its end.
+- tiktok-seller-to-customer-returns.md contains Thai navigation text and a closing "×" control near its end.
+
+These crawler/UI artifacts can contribute unrelated tokens to embeddings and reduce retrieval precision. A later data-cleaning pass could remove navigation, menu, feedback, and footer text while preserving policy content and source provenance.

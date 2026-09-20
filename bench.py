@@ -26,7 +26,6 @@ from src.chunking import ChunkingStrategyComparator
 from src.models import Document
 from src.store import EmbeddingStore
 
-
 CORPUS_DIR = Path("data/ecommerce")
 REQUIRED_FRONTMATTER_FIELDS = (
     "doc_id",
@@ -42,38 +41,38 @@ REQUIRED_FRONTMATTER_FIELDS = (
 BENCHMARK_QUERIES = [
     {
         "id": "Q1",
-        "query": "Người mua Shopee có thể gửi yêu cầu trả hàng hoặc hoàn tiền trong bao lâu kể từ khi đơn hàng được giao thành công?",
-        "gold_doc_ids": ["shopee-return-refund-policy"],
-        "gold_answer": "Thông thường là 15 ngày kể từ lúc đơn hàng được cập nhật giao thành công; riêng thực phẩm tươi sống và đông lạnh là 24 giờ.",
-        "metadata_filter": {"audience": "both"},
+        "query": "Khi Shopee chấp nhận yêu cầu, Hoàn Tiền Ngay và Trả hàng & Hoàn tiền khác nhau như thế nào?",
+        "gold_doc_ids": ["shopee-request-processing"],
+        "gold_answer": "Hoàn Tiền Ngay không yêu cầu người mua trả hàng; với Trả hàng & Hoàn tiền, người mua phải chọn phương thức trả hàng và gửi hàng về kho Shopee hoặc người bán trong vòng 6 ngày từ khi nhận thông báo.",
+        "metadata_filter": {"audience": "buyer"},
     },
     {
         "id": "Q2",
-        "query": "Người bán Shopee có bao lâu để phản hồi nếu không đồng ý với quyết định hoàn tiền hoặc có vấn đề với sản phẩm hoàn trả?",
-        "gold_doc_ids": ["shopee-return-refund-policy"],
-        "gold_answer": "02 ngày lịch kể từ ngày nhận được thông báo của Shopee, trừ khi Shopee quy định một thời hạn khác.",
-        "metadata_filter": None,
+        "query": "Shopee có hoàn phí vận chuyển ban đầu khi người mua chỉ trả lại một số sản phẩm trong đơn không?",
+        "gold_doc_ids": ["shopee-return-shipping-fees"],
+        "gold_answer": "Không. Phí vận chuyển ban đầu chỉ được hoàn khi yêu cầu áp dụng cho toàn bộ sản phẩm và toàn bộ giá trị đã thanh toán được hoàn; nếu chỉ trả một số sản phẩm thì phí này không được hoàn.",
+        "metadata_filter": {"platform": "shopee"},
     },
     {
         "id": "Q3",
-        "query": "Khi Shopee yêu cầu bổ sung bằng chứng cho yêu cầu trả hàng hoặc hoàn tiền, người mua phải bổ sung trong bao lâu?",
+        "query": "Người mua Shopee nên chuẩn bị những bằng chứng nào khi sản phẩm bị lỗi, hư hỏng hoặc khác mô tả?",
         "gold_doc_ids": ["shopee-return-evidence"],
-        "gold_answer": "Trong vòng 24 giờ sau khi nhận được thông báo.",
+        "gold_answer": "Người mua nên quay hoặc chụp toàn bộ kiện hàng, thông tin vận chuyển và niêm phong; video mở kiện nên liên tục và thể hiện rõ quá trình mở gói, tình trạng sản phẩm cùng lỗi, hư hỏng, thiếu hàng hoặc điểm khác mô tả.",
         "metadata_filter": {"audience": "buyer"},
     },
     {
         "id": "Q4",
         "query": "Nếu TikTok Shop đưa ra quyết định có lợi cho khách hàng trong tranh chấp hậu mãi, người bán phải thực hiện hành động khắc phục trong bao lâu?",
         "gold_doc_ids": ["tiktok-aftersales-disputes"],
-        "gold_answer": "Trong vòng 48 giờ sau khi nhận được thông báo.",
-        "metadata_filter": {"audience": "seller"},
+        "gold_answer": "Người bán phải thực hiện biện pháp khắc phục trong vòng 48 giờ, chẳng hạn hoàn tiền hoặc thay sản phẩm, và chịu phí vận chuyển nếu có.",
+        "metadata_filter": {"platform": "tiktok_shop"},
     },
     {
         "id": "Q5",
-        "query": "Khi người mua Shopee nhận sản phẩm bị lỗi hoặc khác mô tả, bằng chứng nào nên được chuẩn bị để hỗ trợ yêu cầu trả hàng hoặc hoàn tiền?",
-        "gold_doc_ids": ["shopee-return-evidence"],
-        "gold_answer": "Nên chuẩn bị video mở kiện hàng quay liên tục, rõ ràng, thể hiện tình trạng kiện hàng, mã vận đơn, quá trình mở kiện và tình trạng sản phẩm.",
-        "metadata_filter": {"audience": "buyer"},
+        "query": "Sau khi nhân viên chăm sóc khách hàng TikTok Shop liên hệ, người bán có bao lâu và phải làm gì để gửi trả sản phẩm cho người mua?",
+        "gold_doc_ids": ["tiktok-seller-to-customer-returns"],
+        "gold_answer": "Người bán có 1 ngày làm việc để đóng gói an toàn, gắn nhãn vận chuyển và gửi qua đơn vị vận chuyển tiết kiệm có cung cấp mã theo dõi.",
+        "metadata_filter": {"audience": "seller"},
     },
 ]
 
@@ -86,7 +85,10 @@ def parse_frontmatter(raw_text: str, source: Path) -> tuple[dict[str, str], str]
 
     match = re.match(r"^---\s*\r?\n(.*?)\r?\n---\s*(?:\r?\n)?", raw_text, re.DOTALL)
     if not match:
-        print(f"WARNING: {source}: frontmatter closing delimiter is missing", file=sys.stderr)
+        print(
+            f"WARNING: {source}: frontmatter closing delimiter is missing",
+            file=sys.stderr,
+        )
         return {}, raw_text
 
     metadata: dict[str, str] = {}
@@ -99,9 +101,14 @@ def parse_frontmatter(raw_text: str, source: Path) -> tuple[dict[str, str], str]
             value = value[1:-1]
         metadata[key.strip()] = value
 
-    missing = [field for field in REQUIRED_FRONTMATTER_FIELDS if not metadata.get(field)]
+    missing = [
+        field for field in REQUIRED_FRONTMATTER_FIELDS if not metadata.get(field)
+    ]
     if missing:
-        print(f"WARNING: {source}: missing required metadata: {', '.join(missing)}", file=sys.stderr)
+        print(
+            f"WARNING: {source}: missing required metadata: {', '.join(missing)}",
+            file=sys.stderr,
+        )
     return metadata, raw_text[match.end() :].strip()
 
 
@@ -117,10 +124,16 @@ def load_source_documents(corpus_dir: Path = CORPUS_DIR) -> list[Document]:
         for row in csv.DictReader(handle):
             doc_id = (row.get("doc_id") or "").strip()
             if not doc_id:
-                print("WARNING: sources.csv contains a row without doc_id", file=sys.stderr)
+                print(
+                    "WARNING: sources.csv contains a row without doc_id",
+                    file=sys.stderr,
+                )
                 continue
             if doc_id in seen_doc_ids:
-                print(f"WARNING: duplicate doc_id in sources.csv: {doc_id}", file=sys.stderr)
+                print(
+                    f"WARNING: duplicate doc_id in sources.csv: {doc_id}",
+                    file=sys.stderr,
+                )
                 continue
             seen_doc_ids.add(doc_id)
 
@@ -128,9 +141,13 @@ def load_source_documents(corpus_dir: Path = CORPUS_DIR) -> list[Document]:
             # historical file_path values that may point at another dataset.
             path = corpus_dir / f"{doc_id}.md"
             if not path.exists():
-                print(f"WARNING: indexed source file is missing: {path}", file=sys.stderr)
+                print(
+                    f"WARNING: indexed source file is missing: {path}", file=sys.stderr
+                )
                 continue
-            metadata, content = parse_frontmatter(path.read_text(encoding="utf-8"), path)
+            metadata, content = parse_frontmatter(
+                path.read_text(encoding="utf-8"), path
+            )
             metadata["doc_id"] = doc_id
             documents.append(Document(id=doc_id, content=content, metadata=metadata))
     return documents
@@ -139,10 +156,18 @@ def load_source_documents(corpus_dir: Path = CORPUS_DIR) -> list[Document]:
 def create_chunker(name: str):
     """Return a benchmark chunker and the parameters displayed in the report."""
     if name == "fixed":
-        return FixedSizeChunker(chunk_size=500, overlap=50), {"chunk_size": 500, "overlap": 50}
+        return FixedSizeChunker(chunk_size=500, overlap=50), {
+            "chunk_size": 500,
+            "overlap": 50,
+        }
     if name == "sentence":
-        return SentenceChunker(max_sentences_per_chunk=3), {"max_sentences_per_chunk": 3}
-    return RecursiveChunker(chunk_size=500), {"chunk_size": 500, "separators": RecursiveChunker.DEFAULT_SEPARATORS}
+        return SentenceChunker(max_sentences_per_chunk=3), {
+            "max_sentences_per_chunk": 3
+        }
+    return RecursiveChunker(chunk_size=500), {
+        "chunk_size": 500,
+        "separators": RecursiveChunker.DEFAULT_SEPARATORS,
+    }
 
 
 def create_embedder(name: str) -> Callable[[str], list[float]]:
@@ -165,16 +190,22 @@ def create_embedder(name: str) -> Callable[[str], list[float]]:
         try:
             return OpenAIEmbedder()
         except Exception as exc:
-            raise RuntimeError(f"Could not initialize OpenAI embeddings: {exc}") from exc
+            raise RuntimeError(
+                f"Could not initialize OpenAI embeddings: {exc}"
+            ) from exc
     if not (os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")):
-        raise RuntimeError("GEMINI_API_KEY or GOOGLE_API_KEY is required for --embedding gemini.")
+        raise RuntimeError(
+            "GEMINI_API_KEY or GOOGLE_API_KEY is required for --embedding gemini."
+        )
     try:
         return GeminiEmbedder()
     except Exception as exc:
         raise RuntimeError(f"Could not initialize Gemini embeddings: {exc}") from exc
 
 
-def build_store(documents: list[Document], chunker: Any, embedder: Callable[[str], list[float]]) -> tuple[EmbeddingStore, int]:
+def build_store(
+    documents: list[Document], chunker: Any, embedder: Callable[[str], list[float]]
+) -> tuple[EmbeddingStore, int]:
     """Chunk source documents outside the store, then add one record per chunk."""
     chunks: list[Document] = []
     for source_document in documents:
@@ -204,7 +235,9 @@ def gold_rank(results: list[dict[str, Any]], gold_doc_ids: list[str]) -> int | N
     return None
 
 
-def answer_keyword_match(gold_answer: str, results: list[dict[str, Any]]) -> tuple[bool, list[str]]:
+def answer_keyword_match(
+    gold_answer: str, results: list[dict[str, Any]]
+) -> tuple[bool, list[str]]:
     """Provide a lightweight clue check without claiming to score answer quality."""
     tokens = re.findall(r"\w+", gold_answer.casefold(), flags=re.UNICODE)
     useful_tokens = sorted({token for token in tokens if len(token) >= 4})
@@ -250,13 +283,17 @@ def compare_chunkers(documents: list[Document], lines: list[str]) -> None:
         "tiktok-aftersales-disputes",
     }
     comparator = ChunkingStrategyComparator()
-    lines.extend(["BASELINE CHUNKING COMPARISON", "document | strategy | count | avg_length"])
+    lines.extend(
+        ["BASELINE CHUNKING COMPARISON", "document | strategy | count | avg_length"]
+    )
     for document in documents:
         if document.id not in representative_ids:
             continue
         comparison = comparator.compare(document.content, chunk_size=500)
         for strategy, stats in comparison.items():
-            lines.append(f"{document.id} | {strategy} | {stats['count']} | {stats['avg_length']:.2f}")
+            lines.append(
+                f"{document.id} | {strategy} | {stats['count']} | {stats['avg_length']:.2f}"
+            )
     lines.append("")
 
 
@@ -298,7 +335,9 @@ def run_benchmark(args: argparse.Namespace) -> list[str]:
         total_document_score += document_score
         gold_at_1 += rank == 1
         gold_at_3 += rank is not None and rank <= 3
-        clue_found, matched_keywords = answer_keyword_match(specification["gold_answer"], results)
+        clue_found, matched_keywords = answer_keyword_match(
+            specification["gold_answer"], results
+        )
 
         lines.extend(
             [
@@ -356,12 +395,27 @@ def run_benchmark(args: argparse.Namespace) -> list[str]:
 
 def parse_args() -> argparse.Namespace:
     """Build a concise command-line interface for repeatable benchmark runs."""
-    parser = argparse.ArgumentParser(description="Benchmark ecommerce-policy document retrieval.")
-    parser.add_argument("--chunker", choices=("recursive", "fixed", "sentence"), default="recursive")
-    parser.add_argument("--embedding", choices=("mock", "local", "openai", "gemini"), default="local")
-    parser.add_argument("--top-k", type=int, default=3, help="Number of chunks to retrieve per query (default: 3).")
+    parser = argparse.ArgumentParser(
+        description="Benchmark ecommerce-policy document retrieval."
+    )
+    parser.add_argument(
+        "--chunker", choices=("recursive", "fixed", "sentence"), default="recursive"
+    )
+    parser.add_argument(
+        "--embedding", choices=("mock", "local", "openai", "gemini"), default="local"
+    )
+    parser.add_argument(
+        "--top-k",
+        type=int,
+        default=3,
+        help="Number of chunks to retrieve per query (default: 3).",
+    )
     parser.add_argument("--output", type=Path, default=Path("ket_qua_benchmark.txt"))
-    parser.add_argument("--compare-chunkers", action="store_true", help="Include baseline chunking statistics for three representative documents.")
+    parser.add_argument(
+        "--compare-chunkers",
+        action="store_true",
+        help="Include baseline chunking statistics for three representative documents.",
+    )
     return parser.parse_args()
 
 
