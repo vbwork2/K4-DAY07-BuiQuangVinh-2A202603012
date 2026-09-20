@@ -1,4 +1,0 @@
-# Core dependencies plus the optional local embedding backend.
-# Install with: python -m pip install -r requirements-local.txt
--r requirements.txt
-sentence-transformers==5.6.0

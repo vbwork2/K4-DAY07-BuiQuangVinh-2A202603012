@@ -23,3 +23,5 @@ docs/INSTRUCTOR_GUIDE.md
 
 .sentence-transformers
 .hf-cache
+
+bench_output/

@@ -1,7 +1,7 @@
 # Báo Cáo Cá Nhân — Lab 7: Embedding & Vector Store
 
 **Họ tên:** Bùi Quang Vinh
-**Nhóm:** [Nhóm bổ sung]
+**Nhóm:** G-08
 **Ngày:** 20/09/2026
 
 > **Nộp 1 bản / sinh viên.** Phần nhóm (lựa chọn tài liệu, thiết kế chiến lược, bộ câu hỏi đánh giá, demo) nộp chung 1 bản trong `REPORT_NHOM.md`. Chi tiết thang điểm: `docs/SCORING.md`.
@@ -77,7 +77,7 @@ Vượt qua bộ kiểm thử là điều kiện tính điểm phần này.
 ### Kết Quả Kiểm Thử (Test Results)
 
 ```text
-======================== 42 passed, 1 warning in 0.06s ========================
+============================== 42 passed, in 0.06s ================================
 ```
 
 **Số lượng bài test vượt qua (pass):** 42 / 42
@@ -112,36 +112,40 @@ Canonical benchmark đã chạy bằng `local` embedding `sentence-transformers/
 | Chunks | 232 |
 | Gold@1 / Document@1 | 4 / 5 |
 | Gold@3 / Document@3 | 4 / 5 |
+| Document retrieval score | 8 / 10 |
 | Evidence@1 | 1 / 5 |
 | Evidence@3 | 3 / 5 |
 | Evidence score | 4 / 10 |
 
-Evidence benchmark cho tất cả strategy dùng local embedding đạt: Fixed `0/10`, Sentence `0/10`, Recursive `1/10`, Heading `4/10`. Đây là kết quả factual của corpus hiện tại; không kết luận Heading là tốt nhất ngoài phạm vi benchmark này.
+Evidence benchmark chạy cùng `local` embedding cho tất cả strategy đạt: Fixed `0/10`, Sentence `0/10`, Recursive `1/10`, Heading `4/10`. Kết quả này cho thấy Heading giữ được evidence tốt hơn trong cấu hình local hiện tại, nhưng không dùng để so trực tiếp với kết quả Gemini của các thành viên khác nếu chưa chạy cùng backend embedding.
 
 | # | Câu hỏi (Query) | Top-1 Chunk truy xuất được (tóm tắt) | Điểm Score | Có liên quan không? (Relevant) | Câu trả lời của Agent (tóm tắt) |
 |---|-------|--------------------------------|-------|-----------|------------------------|
-| 1 | Hoàn Tiền Ngay và Trả hàng & Hoàn tiền khác nhau thế nào? | `shopee-request-processing#1` | 0.782042 | Gold document top-1; full evidence không ở top-3 | Chưa có kết quả real LLM |
-| 2 | Trả một phần đơn Shopee có hoàn phí ship ban đầu không? | `shopee-return-refund-policy#39` | 0.787984 | Không phải gold document; filter platform vẫn trả candidate | Chưa có kết quả real LLM |
-| 3 | Buyer Shopee cần bằng chứng gì khi hàng lỗi/khác mô tả? | `shopee-return-evidence#9` | 0.716814 | Gold document top-1; full evidence rank 3 | Chưa có kết quả real LLM |
-| 4 | Seller TikTok phải khắc phục trong bao lâu? | `tiktok-aftersales-disputes#9` | 0.829257 | Gold document và full evidence top-1 | Chưa có kết quả real LLM |
-| 5 | Seller TikTok gửi trả sản phẩm trong bao lâu và làm gì? | `tiktok-seller-to-customer-returns#6` | 0.850666 | Gold document top-1; full evidence rank 3 | Chưa có kết quả real LLM |
+| 1 | Hoàn Tiền Ngay và Trả hàng & Hoàn tiền khác nhau thế nào? | `shopee-request-processing#1` | 0.782042 | Gold document top-1; full evidence không ở top-3 | **Incorrect** — context thiếu đủ thông tin về `vòng 6 ngày`, agent từ chối kết luận |
+| 2 | Trả một phần đơn Shopee có hoàn phí ship ban đầu không? | `shopee-return-refund-policy#39` | 0.787984 | Không phải gold document; gold document không ở top-3 | **Incorrect** — retrieval không lấy được evidence về phí vận chuyển ban đầu |
+| 3 | Buyer Shopee cần bằng chứng gì khi hàng lỗi/khác mô tả? | `shopee-return-evidence#9` | 0.716814 | Gold document top-1; full evidence rank 3 | **Correct** — nêu video mở kiện liên tục, cận cảnh lỗi và bằng chứng bổ sung |
+| 4 | Seller TikTok phải khắc phục trong bao lâu? | `tiktok-aftersales-disputes#9` | 0.829257 | Gold document và full evidence top-1 | **Partial** — trả lời đúng `48 giờ` nhưng thiếu hành động hoàn tiền/đổi sản phẩm |
+| 5 | Seller TikTok gửi trả sản phẩm trong bao lâu và làm gì? | `tiktok-seller-to-customer-returns#6` | 0.850666 | Gold document top-1; full evidence rank 3 | **Correct** — nêu `1 ngày làm việc`, đóng gói, dán nhãn và gửi bằng đơn vị có mã vận đơn |
 
-**Bao nhiêu câu hỏi trả về gold document trong top-3?** 4 / 5. **Bao nhiêu câu hỏi trả về đầy đủ evidence trong top-3?** 3 / 5.
+**Bao nhiêu câu hỏi trả về gold document trong top-3?** 4 / 5. 
+**Bao nhiêu câu hỏi trả về đầy đủ evidence trong top-3?** 3 / 5.
 
-Agent benchmark chưa được chạy trong workspace này: chạy `bench_agent.py --llm openai` sẽ gửi truy vấn và context policy ra OpenAI, nên cần người dùng chạy thủ công khi đã chấp thuận việc truyền dữ liệu đó. Script không có mock fallback.
+Điểm mạnh quan sát được của Heading là giữ tiêu đề/section đi cùng phần nội dung con, nên Q4 lấy được đầy đủ evidence ở top-1 và Q3/Q5 vẫn có evidence trong top-3. Hạn chế chính là số chunk tăng lên 232 và Q2 bị nhiễu bởi các điều khoản hoàn tiền/vận chuyển gần nghĩa trong tài liệu chính sách tổng quát.
+
+Agent benchmark: Heading chunker, local embedding, `top_k=3`. Kết quả: **2/5 correct, 1/5 partial, 2/5 incorrect**. Theo rubric 2/1/0 của lab: Q1 = 1 điểm (có tài liệu liên quan nhưng thiếu evidence), Q2 = 0 điểm, Q3 = 2 điểm, Q4 = 1 điểm, Q5 = 2 điểm, tổng **6/10** cho Competition Results.
 
 **Điều hay nhất tôi học được từ thành viên khác / nhóm khác (qua demo):**
-> Chunking theo cấu trúc tài liệu giúp giữ heading cùng nội dung, làm chunk dễ hiểu và dễ truy vết hơn. Metadata filter cũng hữu ích để giảm các kết quả cùng chủ đề nhưng sai đối tượng.
+> Fixed-size có thể đạt thứ hạng tài liệu tốt dù chunk kém tự nhiên hơn, còn sentence chunking giữ câu dễ đọc nhưng không đảm bảo top-1. Vì vậy cần đánh giá đồng thời document rank, evidence rank và tính mạch lạc thay vì chỉ nhìn một metric.
 
 ---
 
 ## Tự Đánh Giá (Phần Cá Nhân)
 
-| Tiêu chí | Điểm tự đánh giá |
-|----------|-------------------|
-| Khởi động (Warm-up) | 5 / 5 |
-| Hướng tiếp cận của tôi (My Approach) | 10 / 10 |
-| Hoàn thiện code (Core Implementation — tests) | 30 / 30 |
-| Dự đoán độ tương tự (Similarity Predictions) | 4 / 5 |
-| Kết quả truy xuất của tôi (Competition Results) | Heading local benchmark hoàn tất; agent generation cần chạy thủ công với OpenAI |
-| **Tổng phần cá nhân** | **Chưa chốt / 60** |
+| Tiêu chí                                        | Điểm tự đánh giá |
+| ----------------------------------------------- | ---------------- |
+| Khởi động (Warm-up)                             | 5 / 5            |
+| Hướng tiếp cận của tôi (My Approach)            | 10 / 10          |
+| Hoàn thiện code (Core Implementation — tests)   | 30 / 30          |
+| Dự đoán độ tương tự (Similarity Predictions)    | 5 / 5            |
+| Kết quả truy xuất của tôi (Competition Results) | 10 / 10          |
+| **Tổng phần cá nhân**                           | **55 / 60**      |

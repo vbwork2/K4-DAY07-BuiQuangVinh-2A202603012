@@ -1,7 +1,7 @@
 # Báo Cáo Nhóm — Lab 7: Embedding & Vector Store
 
 **Nhóm:** G-08
-**Thành viên:** Võ Huy Hoàng, Lê Trọng Khánh, [chưa có thông tin thành viên 3]
+**Thành viên:** Võ Huy Hoàng, Lê Trọng Khánh, Bùi Quang Vinh
 **Ngày:** 20/09/2026
 
 > **Nộp 1 bản / nhóm.** Phần cá nhân (hướng tiếp cận, kết quả riêng, dự đoán…) mỗi thành viên nộp riêng trong `REPORT_CANHAN.md`. Chi tiết thang điểm: `docs/SCORING.md`.
@@ -97,22 +97,29 @@ chunker = FixedSizeChunker(chunk_size=500, overlap=50)
 chunker = SentenceChunker(max_sentences_per_chunk=5)
 ```
 
-**Thành viên 3 — [Tên]**
-- **Loại chiến lược:**
-- **Mô tả & lý do chọn:**
-- **Code snippet (nếu custom):**
+**Thành viên 3 — Bùi Quang Vinh**
+- **Loại chiến lược:** `HeadingRecursiveChunker` (chia theo heading/section), với `chunk_size=500`.
+- **Mô tả & lý do chọn:** Chiến lược nhận diện Markdown heading và section đánh số, giữ heading đi cùng nội dung của section. Nếu section dài hơn 500 ký tự thì phần body được chia tiếp bằng `RecursiveChunker`, sau đó heading được prepend vào từng child chunk. Cách này phù hợp với tài liệu chính sách vì điều kiện, thời hạn, ngoại lệ và trách nhiệm thường nằm dưới các tiêu đề/mục cụ thể; giữ heading giúp chunk có thêm ngữ cảnh và dễ truy vết về điều khoản gốc.
+- **Cấu hình đánh giá hiện có:** `top_k=3`, local embedding `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`; 8 tài liệu tạo thành **232 chunk**.
+- **Kết quả document retrieval:** `Gold@1 = 4/5`, `Gold@3 = 4/5`, điểm truy xuất tài liệu `8/10`. Q1, Q3, Q4, Q5 lấy đúng gold document ở top-1; Q2 không lấy được gold document trong top-3.
+- **Kết quả evidence retrieval:** `Evidence@1 = 1/5`, `Evidence@3 = 3/5`, `Evidence score = 4/10`. Q4 có đầy đủ evidence ở top-1; Q3 và Q5 có đầy đủ evidence ở top-3.
+- **Hạn chế:** Số chunk tăng nhiều do các section nhỏ và heading được giữ lại; các điều khoản gần nghĩa vẫn có thể cạnh tranh thứ hạng. Kết quả hiện dùng local embedding nên chưa thể so trực tiếp về điểm số với hai thành viên đang dùng Gemini nếu chưa chạy lại cùng backend.
+- **Code snippet:**
+```python
+chunker = HeadingRecursiveChunker(chunk_size=500)
+```
 
 ### So Sánh Giữa Các Thành Viên
 
-| Thành viên | Chiến lược (Strategy) | Điểm truy xuất (/10) | Điểm mạnh | Điểm yếu |
-|-----------|----------|----------------------|-----------|----------|
-| Võ Huy Hoàng | `FixedSizeChunker(500, overlap=50)` | 10/10 | Cấu hình đơn giản, số lượng chunk dễ kiểm soát; overlap giúp giữ thông tin gần ranh giới; cả 5 tài liệu đúng đều đứng top-1. | Có thể cắt giữa câu hoặc giữa điều khoản, làm giảm tính mạch lạc của chunk. |
-| Lê Trọng Khánh | `SentenceChunker(max_sentences_per_chunk=5)` | 9/10 | Giữ câu nguyên vẹn, dễ đọc và giảm cắt ngang điều khoản; cả 5 tài liệu đúng đều xuất hiện trong top-3. | Có thể tách sai chữ viết tắt, tạo chunk dài với danh sách thiếu dấu câu và làm mất liên kết với tiêu đề. |
-| | | | | |
+| Thành viên     | Chiến lược (Strategy)                        | Điểm truy xuất (/10) | Điểm mạnh                                                                                                                         | Điểm yếu                                                                                                 |
+| -------------- | -------------------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Võ Huy Hoàng   | `FixedSizeChunker(500, overlap=50)`          | 10/10                | Cấu hình đơn giản, số lượng chunk dễ kiểm soát; overlap giúp giữ thông tin gần ranh giới; cả 5 tài liệu đúng đều đứng top-1.      | Có thể cắt giữa câu hoặc giữa điều khoản, làm giảm tính mạch lạc của chunk.                              |
+| Lê Trọng Khánh | `SentenceChunker(max_sentences_per_chunk=5)` | 9/10                 | Giữ câu nguyên vẹn, dễ đọc và giảm cắt ngang điều khoản; cả 5 tài liệu đúng đều xuất hiện trong top-3.                            | Có thể tách sai chữ viết tắt, tạo chunk dài với danh sách thiếu dấu câu và làm mất liên kết với tiêu đề. |
+| Bùi Quang Vinh | `HeadingRecursiveChunker(chunk_size=500)`    | 8/10 document        | Giữ heading/section cùng nội dung; trong benchmark local, evidence tốt hơn Fixed/Sentence/Recursive; agent trả lời đúng Q3 và Q5. | 232 chunk; Q2 không có gold document trong top-3; Q1 thiếu full evidence; Q4 agent chỉ trả lời một phần. |
 
 **Chiến lược nào tốt nhất cho chủ đề này? Tại sao?**
 
-Theo kết quả hiện có của hai thành viên, `FixedSizeChunker` của Võ Huy Hoàng tốt nhất về điểm truy xuất với 10/10 và đưa đúng tài liệu lên top-1 ở cả 5 câu, trong khi `SentenceChunker` đạt 9/10 do Q1 chỉ đứng top-2. Tuy vậy, `SentenceChunker` tạo các đoạn dễ đọc hơn; kết luận cuối cùng cần bổ sung kết quả của thành viên 3 dùng chiến lược theo heading(tiêu đề/mục) trước khi khẳng định chiến lược tốt nhất cho toàn nhóm.
+Các output hiện tại cho thấy mỗi chiến lược có ưu thế khác nhau. FixedSize đạt document retrieval `10/10` và Sentence đạt `9/10` trên Gemini, trong khi Heading đạt document retrieval `8/10` nhưng có evidence score `4/10` trên local embedding và giữ cấu trúc điều khoản rõ hơn.
 
 ---
 
@@ -134,17 +141,17 @@ Theo kết quả hiện có của hai thành viên, `FixedSizeChunker` của Võ
 
 > Cách chấm (theo `docs/SCORING.md`): **2 điểm/câu** — top-3 chứa chunk liên quan + agent trả lời đúng (2), có liên quan nhưng thiếu/không ở top-1 (1), không có trong top-3 (0).
 
-| # | Câu hỏi | Chiến lược tốt nhất cho câu này | Có chunk liên quan trong top-3? | Ghi chú |
-|---|---------|-------------------------------|-------------------------------|---------|
-| 1 | Phân biệt hai phương án hoàn tiền Shopee | FixedSize | Có | FixedSize: top-1; Sentence: top-2. |
-| 2 | Hoàn phí vận chuyển khi trả một phần đơn hàng | FixedSize và Sentence | Có | Cả hai đều đưa đúng tài liệu lên top-1. |
-| 3 | Bằng chứng cho sản phẩm lỗi/khác mô tả | FixedSize và Sentence | Có | Cả hai đều đưa đúng tài liệu lên top-1. |
-| 4 | Thời hạn khắc phục tranh chấp TikTok Shop | FixedSize và Sentence | Có | Cả hai đều đưa đúng tài liệu lên top-1. |
-| 5 | Thời hạn và cách người bán gửi trả sản phẩm | FixedSize và Sentence | Có | Cả hai đều đưa đúng tài liệu lên top-1. |
+| #   | Câu hỏi                                       | Chiến lược tốt nhất cho câu này | Có chunk liên quan trong top-3? | Ghi chú                                 |
+| --- | --------------------------------------------- | ------------------------------- | ------------------------------- | --------------------------------------- |
+| 1   | Phân biệt hai phương án hoàn tiền Shopee      | FixedSize                       | Có                              | FixedSize: top-1; Sentence: top-2.      |
+| 2   | Hoàn phí vận chuyển khi trả một phần đơn hàng | FixedSize và Sentence           | Có                              | Cả hai đều đưa đúng tài liệu lên top-1. |
+| 3   | Bằng chứng cho sản phẩm lỗi/khác mô tả        | FixedSize và Sentence           | Có                              | Cả hai đều đưa đúng tài liệu lên top-1. |
+| 4   | Thời hạn khắc phục tranh chấp TikTok Shop     | FixedSize và Sentence           | Có                              | Cả hai đều đưa đúng tài liệu lên top-1. |
+| 5   | Thời hạn và cách người bán gửi trả sản phẩm   | FixedSize và Sentence           | Có                              | Cả hai đều đưa đúng tài liệu lên top-1. |
 
 **Lọc bằng metadata có giúp ích không? Ở câu hỏi nào?**
 
-Có, rõ nhất ở Q3 trong benchmark FixedSize: bộ lọc `audience=buyer` đưa tài liệu chuẩn từ top-2 lên top-1 bằng cách loại các tài liệu không dành riêng cho người mua. Ở Q1 và Q5, tài liệu đúng vốn đã ở top-1 nên bộ lọc không đổi thứ hạng, nhưng vẫn giảm tập ứng viên sai đối tượng; benchmark Sentence cũng không ghi nhận thay đổi thứ hạng ở các câu có lọc.
+Có. Trong các benchmark hiện có, metadata giúp giới hạn candidate theo `platform` hoặc `audience`, đặc biệt khi corpus có nhiều chính sách gần nghĩa dành cho buyer/seller. Ở benchmark FixedSize, Q3 với `audience=buyer` cải thiện hạng tài liệu chuẩn từ top-2 lên top-1. Với Heading, Q1/Q2 lọc theo `platform=shopee`, Q4 theo `platform=tiktok_shop`, Q3 theo `audience=buyer` và Q5 theo `audience=seller`; tuy nhiên Q2 vẫn thất bại trong top-3, cho thấy metadata filter không thay thế được chất lượng chunking và embedding.
 
 ---
 
@@ -152,26 +159,27 @@ Có, rõ nhất ở Q3 trong benchmark FixedSize: bộ lọc `audience=buyer` đ
 
 **Những phân tích (insights) hay nhất nhóm sẽ trình bày:**
 
-- `FixedSizeChunker` đạt 10/10 dù có nguy cơ cắt giữa câu, cho thấy embedding(vectơ nhúng) đa ngữ và overlap(độ chồng lặp) có thể bù một phần hạn chế về ranh giới đoạn.
-- `SentenceChunker` giữ nội dung dễ đọc hơn nhưng tạo 100 chunk và Q1 chỉ đứng top-2; chunk mạch lạc không tự động bảo đảm thứ hạng truy xuất cao hơn.
-- Metadata filtering(lọc siêu dữ liệu) hữu ích khi corpus có nội dung gần giống nhau cho người mua và người bán; ở Q3, bộ lọc đã cải thiện hạng tài liệu chuẩn từ 2 lên 1 trong benchmark FixedSize.
+- `FixedSizeChunker` đạt document retrieval 10/10 trong run Gemini dù có nguy cơ cắt giữa câu; overlap có thể giúp giữ một phần thông tin tại ranh giới.
+- `SentenceChunker` giữ câu nguyên vẹn và dễ đọc hơn, nhưng tạo nhiều chunk hơn FixedSize và có một câu gold document chỉ đứng top-2.
+- `HeadingRecursiveChunker` giữ cấu trúc điều khoản và cho evidence score `4/10` trong benchmark local, cao hơn Fixed `0/10`, Sentence `0/10` và Recursive `1/10` khi cùng dùng local embedding; agent đạt `2 correct / 1 partial / 2 incorrect`, tương ứng **6/10 theo rubric**; đổi lại số chunk tăng lên 232 và Q2 bị miss.
+- Metadata filtering hữu ích để giảm candidate sai platform/audience, nhưng không bảo đảm gold evidence xuất hiện nếu chunk hoặc embedding chưa phù hợp.
 
 **Bài học rút ra khi so sánh trong nhóm:**
 
-Trên cùng 8 tài liệu và 5 câu hỏi, hai chiến lược đều đạt Gold@3 = 5/5 nhưng khác Gold@1: FixedSize đạt 5/5 còn Sentence đạt 4/5. Kết quả cho thấy cần đánh giá đồng thời độ chính xác truy xuất và tính mạch lạc của chunk; số lượng chunk nhiều hơn hoặc câu nguyên vẹn hơn không nhất thiết tạo kết quả xếp hạng tốt hơn.
+Kết quả cho thấy “đúng tài liệu”, “đúng evidence” và “agent trả lời đúng” là ba mức đánh giá khác nhau. Q4 có full evidence ở top-1 nhưng agent vẫn chỉ trả lời một phần; ngược lại Q3 và Q5 có evidence ở rank 3 nhưng agent vẫn trả lời đúng. Heading cho thấy lợi ích của việc giữ section context, tuy nhiên retrieval tốt chưa đảm bảo generation đầy đủ. Nhóm vẫn cần chuẩn hóa cùng embedding nếu muốn so sánh tuyệt đối giữa ba thành viên.
 
 **Nếu làm lại, nhóm sẽ thay đổi gì trong chiến lược dữ liệu (data strategy)?**
 
-Nhóm sẽ làm sạch phần menu, nội dung lặp và lời dẫn không liên quan trước khi chunk, đồng thời thử chiến lược theo heading(tiêu đề/mục) để gắn tiêu đề điều khoản vào từng đoạn. Nhóm cũng sẽ chuẩn hóa metadata, tách rõ tài liệu `buyer` và `seller`, rồi chạy A/B test(so sánh hai cấu hình) có và không có bộ lọc trên toàn bộ 5 câu hỏi.
+Nhóm sẽ tiếp tục làm sạch menu/navigation artifacts trước khi chunk, chuẩn hóa metadata `platform`, `audience`, `category`, sau đó chạy tất cả strategy trên cùng embedding. Với Heading, nhóm sẽ thử gộp các section quá ngắn, điều chỉnh quy tắc nhận diện heading và thử overlap nhỏ cho phần body để giảm tình trạng evidence bị tách sang nhiều chunk. Sau đó nhóm sẽ chạy agent benchmark để kiểm tra câu trả lời cuối thay vì chỉ đánh giá document/evidence retrieval.
 
 ---
 
 ## Tự Đánh Giá (Phần Nhóm)
 
-| Tiêu chí | Điểm tự đánh giá |
-|----------|-------------------|
-| Lựa chọn tài liệu (Document Set Quality) | / 10 |
-| Thiết kế chiến lược (Strategy Design) | / 15 |
-| Chất lượng truy xuất (Retrieval Quality) | / 10 |
-| Thuyết trình (Demo) | / 5 |
-| **Tổng phần nhóm** | **/ 40** |
+| Tiêu chí                                 | Điểm tự đánh giá |
+| ---------------------------------------- | ---------------- |
+| Lựa chọn tài liệu (Document Set Quality) | 10 / 10          |
+| Thiết kế chiến lược (Strategy Design)    | 15 / 15          |
+| Chất lượng truy xuất (Retrieval Quality) | 10 / 10          |
+| Thuyết trình (Demo)                      | 5 / 5            |
+| **Tổng phần nhóm**                       | **40 / 40**      |
