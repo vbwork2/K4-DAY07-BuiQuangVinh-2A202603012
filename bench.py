@@ -13,7 +13,7 @@ from typing import Any, Callable
 
 from dotenv import load_dotenv
 
-from heading_chunker import HeadingRecursiveChunker
+from bench_script.heading_chunker import HeadingRecursiveChunker
 
 from src import (
     FixedSizeChunker,

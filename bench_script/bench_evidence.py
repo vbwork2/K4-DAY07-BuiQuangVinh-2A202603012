@@ -18,7 +18,7 @@ from bench import (
     load_source_documents,
     preview,
 )
-from heading_chunker import HeadingRecursiveChunker
+from bench_script.heading_chunker import HeadingRecursiveChunker
 from src import FixedSizeChunker, RecursiveChunker, SentenceChunker
 
 
