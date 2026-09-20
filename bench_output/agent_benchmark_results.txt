@@ -1,0 +1,229 @@
+KNOWLEDGE BASE AGENT BENCHMARK
+embedding backend: local
+chunker: heading
+chunker parameters: {'chunk_size': 500, 'section_aware': True}
+generation backend: openai (gpt-4o-mini)
+source documents: 8
+chunks: 232
+top_k: 3
+
+QUERY Q1
+
+Question:
+Khi Shopee chấp nhận yêu cầu, Hoàn Tiền Ngay và Trả hàng & Hoàn tiền khác nhau như thế nào?
+
+Gold answer:
+Hoàn Tiền Ngay không yêu cầu người mua trả hàng; với Trả hàng & Hoàn tiền, người mua phải chọn phương thức trả hàng và gửi hàng về kho Shopee hoặc người bán trong vòng 6 ngày từ khi nhận thông báo.
+
+Metadata filter:
+{'platform': 'shopee'}
+
+Retrieved evidence:
+TOP 1
+doc_id: shopee-request-processing
+platform: shopee
+score: 0.782042
+content preview: 1. Nguyên tắc chung Tùy từng trường hợp cụ thể, yêu cầu Trả hàng/ Hoàn tiền của bạn sẽ được Shopee chấp nhận cho Trả hàng ngay sau khi gửi yêu cầu hoặc được chuyển trạng thái Shopee đang xem xét
+
+TOP 2
+doc_id: shopee-return-refund-policy
+platform: shopee
+score: 0.778062
+content preview: 3.1. Người Mua đồng ý rằng Người Mua chỉ có thể yêu cầu trả hàng/hoàn tiền trong các trường hợp sau: 3.3. Đối với các đơn hàng được thanh toán bằng hình thức Thanh toán khi nhận hàng (COD) và/hoặc Chuyển khoản ngân hàng, tài khoản Shopee của Người Mua phải liên kết với các phương thức nhận hoàn t...
+
+TOP 3
+doc_id: shopee-return-refund-policy
+platform: shopee
+score: 0.759755
+content preview: 11. TRANH CHẤP GIỮA NGƯỜI MUA VÀ NGƯỜI BÁN Trong trường hợp khoản tiền thanh toán này đã được trả cho Người Bán theo Chính Sách Shopee Đảm Bảo, Shopee có quyền điều chỉnh số tiền đã thanh toán sau khi có quyết định cuối cùng về việc giải quyết tranh chấp giữa Người bán và Người mua.
+
+Agent answer:
+Context không cung cấp thông tin cụ thể về sự khác nhau giữa "Hoàn Tiền Ngay" và "Trả hàng & Hoàn tiền". Do đó, tôi không thể trả lời câu hỏi này.
+
+Evaluation:
+required evidence concepts: Hoàn Tiền Ngay, vòng 6 ngày
+matched concepts: Hoàn Tiền Ngay
+missing concepts: vòng 6 ngày
+retrieved complete evidence: False
+verdict: incorrect
+
+QUERY Q2
+
+Question:
+Shopee có hoàn phí vận chuyển ban đầu khi người mua chỉ trả lại một số sản phẩm trong đơn không?
+
+Gold answer:
+Không. Phí vận chuyển ban đầu chỉ được hoàn khi yêu cầu áp dụng cho toàn bộ sản phẩm và toàn bộ giá trị đã thanh toán được hoàn; nếu chỉ trả một số sản phẩm thì phí này không được hoàn.
+
+Metadata filter:
+{'platform': 'shopee'}
+
+Retrieved evidence:
+TOP 1
+doc_id: shopee-return-refund-policy
+platform: shopee
+score: 0.787984
+content preview: 7.1. Người Bán sẽ chịu chi phí vận chuyển cho việc trả hàng chiều hoàn trả sản phẩm đối với: đơn yêu cầu trả hàng/hoàn tiền trong trường hợp Shopee chấp thuận (theo quyết định riêng của Shopee) mà không do lỗi của Người Mua hoặc đơn vị vận chuyển, đơn giao không thành công, và các trường hợp ngoạ...
+
+TOP 2
+doc_id: shopee-return-refund-policy
+platform: shopee
+score: 0.780785
+content preview: 9.1. Shopee sẽ chỉ hoàn tiền cho Người Mua thuộc một trong các trường hợp sau: Đơn hàng của Người Mua đủ điều kiện được trả hàng/hoàn tiền và Shopee quyết định cho Người Mua được hoàn tiền khi Người Mua đã gửi trả Sản Phẩm cho đơn vị vận chuyển và đơn vị vận chuyển xác nhận đã nhận được Sản Phẩm ...
+
+TOP 3
+doc_id: shopee-return-refund-policy
+platform: shopee
+score: 0.756291
+content preview: 9.3. Shopee sẽ tự động hoàn tiền cho Người Mua trong trường hợp Người Bán không phản hồi trong khoảng thời gian đã được quy định trước. 9.5. Đối với các trường hợp hoàn tiền ngay do Người Bán đề xuất, số tiền hoàn trả sẽ do hai Bên tự thỏa thuận với nhau nhưng không được thấp hơn 50% giá tr...
+
+Agent answer:
+Context không cung cấp thông tin về việc Shopee có hoàn phí vận chuyển ban đầu khi người mua chỉ trả lại một số sản phẩm trong đơn hay không. Do đó, tôi không thể trả lời câu hỏi này.
+
+Evaluation:
+required evidence concepts: phí vận chuyển ban đầu, không được hoàn lại
+matched concepts: phí vận chuyển ban đầu
+missing concepts: không được hoàn lại
+retrieved complete evidence: False
+verdict: incorrect
+
+QUERY Q3
+
+Question:
+Người mua Shopee nên chuẩn bị những bằng chứng nào khi sản phẩm bị lỗi, hư hỏng hoặc khác mô tả?
+
+Gold answer:
+Người mua nên quay hoặc chụp toàn bộ kiện hàng, thông tin vận chuyển và niêm phong; video mở kiện nên liên tục và thể hiện rõ quá trình mở gói, tình trạng sản phẩm cùng lỗi, hư hỏng, thiếu hàng hoặc điểm khác mô tả.
+
+Metadata filter:
+{'audience': 'buyer'}
+
+Retrieved evidence:
+TOP 1
+doc_id: shopee-return-evidence
+platform: shopee
+score: 0.716814
+content preview: 4. Quy định về bằng chứng Chi tiết: Chụp/quay cận cảnh lỗi hoặc điểm bất thường của sản phẩm. Bằng chứng bổ sung: Nếu có, bạn có thể cung cấp thêm lịch sử chat với người bán hoặc các bằng chứng khác để Shopee có thêm thông tin xử lý. Nếu Shopee cần thêm bằng chứng khác, bạn sẽ nhận được thông báo...
+
+TOP 2
+doc_id: shopee-return-evidence
+platform: shopee
+score: 0.657160
+content preview: 3. Khiếu nại hàng giả/nhái Đối với trường hợp đặc biệt này, bạn cần chuẩn bị thêm bằng chứng chứng minh sản phẩm nhận được là hàng giả/nhái. Dưới đây là một số ví dụ về bằng chứng bạn có thể cung cấp: Loại bằng chứng Cách thực hiện Quét mã QR/ Kiểm tra số seri Quay video quét mã QR, kiểm tra số s...
+
+TOP 3
+doc_id: shopee-return-evidence
+platform: shopee
+score: 0.601826
+content preview: 2. Đã nhận được hàng, khiếu nại hàng có vấn đề (bể vỡ, sai mẫu, hàng lỗi, khác mô tả,...) Trong các trường hợp đã nhận hàng nhưng gặp vấn đề, Shopee khuyến khích bạn chuẩn bị bằng chứng là video mở kiện hàng. Video này sẽ là bằng chứng mạnh nhất để giải quyết khiếu nại của bạn. Video cần đảm bảo ...
+
+Agent answer:
+Người mua Shopee nên chuẩn bị các bằng chứng sau khi sản phẩm bị lỗi, hư hỏng hoặc khác mô tả:
+
+1. **Video mở kiện hàng**: Đây là bằng chứng mạnh nhất để giải quyết khiếu nại. Video cần đảm bảo:
+   - Quay xuyên suốt, liên tục, không bị cắt ghép.
+   - Góc quay rõ ràng, không bị khuất.
+   - Chất lượng video tốt, không bị mờ nhòe.
+   - Thể hiện rõ các thông tin liên quan đến sản phẩm.
+
+2. **Chụp/quay cận cảnh lỗi hoặc điểm bất thường của sản phẩm**: Cung cấp hình ảnh hoặc video rõ ràng về vấn đề của sản phẩm.
+
+3. **Bằng chứng bổ sung**: Nếu có, bạn có thể cung cấp thêm lịch sử chat với người bán hoặc các bằng chứng khác để Shopee có thêm thông tin xử lý. 
+
+Nếu Shopee yêu cầu thêm bằng chứng khác, bạn sẽ nhận được thông báo và cần bổ sung trong vòng 24 giờ.
+
+Evaluation:
+required evidence concepts: video mở kiện hàng, liên tục
+matched concepts: video mở kiện hàng, liên tục
+missing concepts: none
+retrieved complete evidence: True
+verdict: correct
+
+QUERY Q4
+
+Question:
+Nếu TikTok Shop đưa ra quyết định có lợi cho khách hàng trong tranh chấp hậu mãi, người bán phải thực hiện hành động khắc phục trong bao lâu?
+
+Gold answer:
+Người bán phải thực hiện biện pháp khắc phục trong vòng 48 giờ, chẳng hạn hoàn tiền hoặc thay sản phẩm, và chịu phí vận chuyển nếu có.
+
+Metadata filter:
+{'platform': 'tiktok_shop'}
+
+Retrieved evidence:
+TOP 1
+doc_id: tiktok-aftersales-disputes
+platform: tiktok_shop
+score: 0.829257
+content preview: # Nâng cấp tranh chấp hậu mãi trên TikTok Shop Nếu chúng tôi đưa ra quyết định có lợi cho khách hàng, bạn phải thực hiện các hành động cần thiết để tuân thủ quyết định của chúng tôi trong vòng 48 giờ sau khi nhận được thông báo. Những hành động này có thể bao gồm hoàn tiền cho khách hàng hoặc đổi...
+
+TOP 2
+doc_id: tiktok-seller-to-customer-returns
+platform: tiktok_shop
+score: 0.801815
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Bạn phải nộp các tài liệu của mình trong vòng 1 ngày làm việc để đủ điều kiện được hoàn phí. Điều gì xảy ra nếu tôi không tuân thủ? Nếu bạn không phản hồi hoặc không gửi trả lại mặt hàng đúng hạn, đây là những gì sẽ xảy ra: Vụ việc sẽ đư...
+
+TOP 3
+doc_id: tiktok-returns-refunds
+platform: tiktok_shop
+score: 0.786334
+content preview: # Chính sách trả hàng và hoàn tiền TikTok Shop Đối với trả hàng tự sắp xếp: Người bán có thể gửi khiếu nại trong vòng 15 ngày dương lịch kể từ ngày khách hàng gửi hàng trả về. Trả hàng sản phẩm Người mua phải tuân thủ các mốc thời gian sau, nếu không yêu cầu sẽ bị hủy. Lấy hàng: Ngày lấy hàng phả...
+
+Agent answer:
+Người bán phải thực hiện các hành động khắc phục trong vòng 48 giờ sau khi nhận được thông báo từ TikTok Shop.
+
+Evaluation:
+required evidence concepts: 48 giờ, hoàn tiền cho khách hàng hoặc đổi sản phẩm
+matched concepts: 48 giờ
+missing concepts: hoàn tiền cho khách hàng hoặc đổi sản phẩm
+retrieved complete evidence: True
+verdict: partial
+
+QUERY Q5
+
+Question:
+Sau khi nhân viên chăm sóc khách hàng TikTok Shop liên hệ, người bán có bao lâu và phải làm gì để gửi trả sản phẩm cho người mua?
+
+Gold answer:
+Người bán có 1 ngày làm việc để đóng gói an toàn, gắn nhãn vận chuyển và gửi qua đơn vị vận chuyển tiết kiệm có cung cấp mã theo dõi.
+
+Metadata filter:
+{'audience': 'seller'}
+
+Retrieved evidence:
+TOP 1
+doc_id: tiktok-seller-to-customer-returns
+platform: tiktok_shop
+score: 0.850666
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Vận chuyển tiết kiệmSau khi bạn đã gửi trả hàng và yêu cầu hậu mãi được đóng lại, khoản hoàn tiền đủ điều kiện thường sẽ được ghi có trong vòng 14 ngày.Chuyển phát cao cấpNếu bạn chọn dịch vụ chuyển phát cao cấp (ví dụ: DHL, FedEx), bạn ...
+
+TOP 2
+doc_id: tiktok-seller-to-customer-returns
+platform: tiktok_shop
+score: 0.848758
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Bạn phải nộp các tài liệu của mình trong vòng 1 ngày làm việc để đủ điều kiện được hoàn phí. Điều gì xảy ra nếu tôi không tuân thủ? Nếu bạn không phản hồi hoặc không gửi trả lại mặt hàng đúng hạn, đây là những gì sẽ xảy ra: Vụ việc sẽ đư...
+
+TOP 3
+doc_id: tiktok-seller-to-customer-returns
+platform: tiktok_shop
+score: 0.848337
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Sau khi nhân viên dịch vụ khách hàng liên hệ với bạn, đây là những việc bạn cần làm trong vòng 1 ngày làm việc:1. Đóng gói mặt hàng cẩn thận – Đảm bảo mặt hàng được đóng gói chắc chắn. Dán nhãn vận chuyển (Vận đơn hàng không) ở bên ngoài...
+
+Agent answer:
+Sau khi nhân viên chăm sóc khách hàng TikTok Shop liên hệ, người bán có 1 ngày làm việc để thực hiện các bước sau:
+
+1. Đóng gói mặt hàng cẩn thận – Đảm bảo mặt hàng được đóng gói chắc chắn và dán nhãn vận chuyển (Vận đơn hàng không) ở bên ngoài sao cho mã vận đơn dễ nhìn thấy.
+2. Gửi hàng – Sử dụng bất kỳ đơn vị vận chuyển tiết kiệm nào mà họ muốn, miễn là họ cung cấp mã vận đơn.
+
+Evaluation:
+required evidence concepts: 1 ngày làm việc, mã vận đơn
+matched concepts: 1 ngày làm việc, mã vận đơn
+missing concepts: none
+retrieved complete evidence: True
+verdict: correct
+
+SUMMARY
+correct: 2/5
+partial: 1/5
+incorrect: 2/5
+Evaluation uses deterministic source-evidence markers, not LLM self-scoring.
