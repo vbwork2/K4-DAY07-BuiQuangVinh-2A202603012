@@ -63,7 +63,9 @@ class HeadingRecursiveChunker:
         if not heading:
             return RecursiveChunker(chunk_size=self.chunk_size).chunk(body)
         if not body:
-            return RecursiveChunker(chunk_size=self.chunk_size).chunk(heading)
+            # An unusually long heading remains intact because it is itself
+            # the section context and the only permitted size exception.
+            return [heading]
 
         prefix = f"{heading}\n"
         remaining_size = self.chunk_size - len(prefix)
@@ -71,4 +73,8 @@ class HeadingRecursiveChunker:
             return RecursiveChunker(chunk_size=self.chunk_size).chunk(f"{heading}\n{body}")
 
         body_chunks = RecursiveChunker(chunk_size=remaining_size).chunk(body)
-        return [f"{prefix}{chunk}" for chunk in body_chunks]
+        return [
+            f"{prefix}{chunk}".strip()
+            for chunk in body_chunks
+            if chunk.strip()
+        ]

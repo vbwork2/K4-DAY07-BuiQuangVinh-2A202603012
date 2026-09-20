@@ -4,6 +4,7 @@ title: "Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền 
 source_url: "https://help.shopee.vn/portal/4/article/79467"
 retrieved_at: "2026-09-20"
 document_version: "not-stated"
+platform: "shopee"
 audience: "buyer"
 category: "return-evidence"
 language: "vi"

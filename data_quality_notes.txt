@@ -7,4 +7,4 @@ This file records source artifacts only. The corpus content was not modified.
 - tiktok-returns-refunds.md contains page-feedback, next-article, table-of-contents, and closing-control text near its end.
 - tiktok-seller-to-customer-returns.md contains Thai navigation text and a closing "×" control near its end.
 
-These crawler/UI artifacts can contribute unrelated tokens to embeddings and reduce retrieval precision. A later data-cleaning pass could remove navigation, menu, feedback, and footer text while preserving policy content and source provenance.
+These crawler/UI artifacts can contribute unrelated tokens to embeddings and reduce retrieval precision. `bench.clean_policy_text()` now removes only the identified navigation, feedback, table-of-contents, and closing-control artifacts after frontmatter parsing and before chunking. The raw source files and their provenance remain unchanged.

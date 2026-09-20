@@ -13,6 +13,8 @@ from typing import Any, Callable
 
 from dotenv import load_dotenv
 
+from heading_chunker import HeadingRecursiveChunker
+
 from src import (
     FixedSizeChunker,
     GeminiEmbedder,
@@ -33,6 +35,7 @@ REQUIRED_FRONTMATTER_FIELDS = (
     "source_url",
     "retrieved_at",
     "document_version",
+    "platform",
     "audience",
     "category",
     "language",
@@ -44,7 +47,7 @@ BENCHMARK_QUERIES = [
         "query": "Khi Shopee chấp nhận yêu cầu, Hoàn Tiền Ngay và Trả hàng & Hoàn tiền khác nhau như thế nào?",
         "gold_doc_ids": ["shopee-request-processing"],
         "gold_answer": "Hoàn Tiền Ngay không yêu cầu người mua trả hàng; với Trả hàng & Hoàn tiền, người mua phải chọn phương thức trả hàng và gửi hàng về kho Shopee hoặc người bán trong vòng 6 ngày từ khi nhận thông báo.",
-        "metadata_filter": {"audience": "buyer"},
+        "metadata_filter": {"platform": "shopee"},
     },
     {
         "id": "Q2",
@@ -75,6 +78,49 @@ BENCHMARK_QUERIES = [
         "metadata_filter": {"audience": "seller"},
     },
 ]
+
+# Markers come directly from the source evidence needed for each gold answer.
+# A retrieved result is evidence-bearing only when it contains every marker.
+EVIDENCE_MARKERS = {
+    "Q1": ["Hoàn Tiền Ngay", "vòng 6 ngày"],
+    "Q2": ["phí vận chuyển ban đầu", "không được hoàn lại"],
+    "Q3": ["video mở kiện hàng", "liên tục"],
+    "Q4": ["48 giờ", "hoàn tiền cho khách hàng hoặc đổi sản phẩm"],
+    "Q5": ["1 ngày làm việc", "mã vận đơn"],
+}
+
+
+_UI_NOISE_LINES = {
+    "daftar isi",
+    "สารบัญ",
+    "×",
+    "เนื้อหาด้านบนมีประโยชน์หรือไม่",
+    "bạn có hài lòng với bài viết này?",
+    "hài lòng",
+    "không hài lòng",
+    "previous",
+    "next",
+    "trước",
+    "tiếp theo",
+    "ก่อนหน้า",
+    "ถัดไป",
+    "berikutnya",
+}
+_COMBINED_NAVIGATION_LINE = re.compile(r"^ก่อนหน้า.*ถัดไป.*$", re.DOTALL)
+
+
+def clean_policy_text(text: str) -> str:
+    """Remove only known crawler navigation and feedback artifacts."""
+    kept_lines: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        normalized = re.sub(r"\s+", " ", stripped).casefold()
+        if normalized in _UI_NOISE_LINES:
+            continue
+        if _COMBINED_NAVIGATION_LINE.match(stripped):
+            continue
+        kept_lines.append(line)
+    return "\n".join(kept_lines).strip()
 
 
 def parse_frontmatter(raw_text: str, source: Path) -> tuple[dict[str, str], str]:
@@ -149,7 +195,13 @@ def load_source_documents(corpus_dir: Path = CORPUS_DIR) -> list[Document]:
                 path.read_text(encoding="utf-8"), path
             )
             metadata["doc_id"] = doc_id
-            documents.append(Document(id=doc_id, content=content, metadata=metadata))
+            cleaned_content = clean_policy_text(content)
+            metadata["raw_chars"] = str(len(content))
+            metadata["clean_chars"] = str(len(cleaned_content))
+            metadata["removed_chars"] = str(len(content) - len(cleaned_content))
+            documents.append(
+                Document(id=doc_id, content=cleaned_content, metadata=metadata)
+            )
     return documents
 
 
@@ -164,10 +216,17 @@ def create_chunker(name: str):
         return SentenceChunker(max_sentences_per_chunk=3), {
             "max_sentences_per_chunk": 3
         }
-    return RecursiveChunker(chunk_size=500), {
-        "chunk_size": 500,
-        "separators": RecursiveChunker.DEFAULT_SEPARATORS,
-    }
+    if name == "heading":
+        return HeadingRecursiveChunker(chunk_size=500), {
+            "chunk_size": 500,
+            "section_aware": True,
+        }
+    if name == "recursive":
+        return RecursiveChunker(chunk_size=500), {
+            "chunk_size": 500,
+            "separators": RecursiveChunker.DEFAULT_SEPARATORS,
+        }
+    raise ValueError(f"Unsupported chunker: {name}")
 
 
 def create_embedder(name: str) -> Callable[[str], list[float]]:
@@ -235,6 +294,30 @@ def gold_rank(results: list[dict[str, Any]], gold_doc_ids: list[str]) -> int | N
     return None
 
 
+def normalise_text(value: str) -> str:
+    """Normalise case and whitespace for deterministic evidence checks."""
+    return re.sub(r"\s+", " ", value.casefold()).strip()
+
+
+def contains_evidence(result: dict[str, Any], markers: list[str]) -> bool:
+    """Check whether one chunk contains every required evidence marker."""
+    content = normalise_text(result["content"])
+    return all(normalise_text(marker) in content for marker in markers)
+
+
+def gold_evidence_rank(
+    results: list[dict[str, Any]], gold_doc_ids: list[str], markers: list[str]
+) -> int | None:
+    """Find the first result that is both gold-source and evidence-bearing."""
+    gold_ids = set(gold_doc_ids)
+    for rank, result in enumerate(results, start=1):
+        if result["metadata"].get("doc_id") in gold_ids and contains_evidence(
+            result, markers
+        ):
+            return rank
+    return None
+
+
 def answer_keyword_match(
     gold_answer: str, results: list[dict[str, Any]]
 ) -> tuple[bool, list[str]]:
@@ -266,6 +349,7 @@ def append_results(lines: list[str], results: list[dict[str, Any]]) -> None:
                 f"score: {result['score']:.6f}",
                 f"doc_id: {metadata.get('doc_id', '')}",
                 f"title: {metadata.get('title', '')}",
+                f"platform: {metadata.get('platform', '')}",
                 f"audience: {metadata.get('audience', '')}",
                 f"category: {metadata.get('category', '')}",
                 f"chunk_index: {metadata.get('chunk_index', '')}",
@@ -298,7 +382,7 @@ def compare_chunkers(documents: list[Document], lines: list[str]) -> None:
 
 
 def run_benchmark(args: argparse.Namespace) -> list[str]:
-    """Run retrieval, metadata A/B checks, and the document-level summary."""
+    """Run retrieval, metadata checks, and document/evidence summaries."""
     documents = load_source_documents()
     if not documents:
         raise RuntimeError("No indexed ecommerce documents could be loaded.")
@@ -317,13 +401,24 @@ def run_benchmark(args: argparse.Namespace) -> list[str]:
         f"number of chunks: {chunk_count}",
         f"top_k: {args.top_k}",
         "",
+        "PREPROCESSING",
     ]
+    for document in documents:
+        lines.append(
+            f"{document.id} | raw_chars={document.metadata['raw_chars']} | "
+            f"clean_chars={document.metadata['clean_chars']} | "
+            f"removed_chars={document.metadata['removed_chars']}"
+        )
+    lines.append("")
     if args.compare_chunkers:
         compare_chunkers(documents, lines)
 
     gold_at_1 = 0
     gold_at_3 = 0
+    evidence_at_1 = 0
+    evidence_at_3 = 0
     total_document_score = 0
+    total_evidence_score = 0
     for specification in BENCHMARK_QUERIES:
         results = store.search_with_filter(
             query=specification["query"],
@@ -331,10 +426,18 @@ def run_benchmark(args: argparse.Namespace) -> list[str]:
             metadata_filter=specification["metadata_filter"],
         )
         rank = gold_rank(results, specification["gold_doc_ids"])
+        markers = EVIDENCE_MARKERS[specification["id"]]
+        evidence_rank = gold_evidence_rank(
+            results, specification["gold_doc_ids"], markers
+        )
         document_score = 2 if rank == 1 else 1 if rank in {2, 3} else 0
+        evidence_score = 2 if evidence_rank == 1 else 1 if evidence_rank in {2, 3} else 0
         total_document_score += document_score
+        total_evidence_score += evidence_score
         gold_at_1 += rank == 1
         gold_at_3 += rank is not None and rank <= 3
+        evidence_at_1 += evidence_rank == 1
+        evidence_at_3 += evidence_rank is not None and evidence_rank <= 3
         clue_found, matched_keywords = answer_keyword_match(
             specification["gold_answer"], results
         )
@@ -346,6 +449,7 @@ def run_benchmark(args: argparse.Namespace) -> list[str]:
                 f"Gold answer: {specification['gold_answer']}",
                 f"Gold document: {', '.join(specification['gold_doc_ids'])}",
                 f"Metadata filter: {specification['metadata_filter']}",
+                f"Evidence markers: {markers}",
                 "",
             ]
         )
@@ -354,6 +458,8 @@ def run_benchmark(args: argparse.Namespace) -> list[str]:
             [
                 f"gold rank: {rank if rank is not None else 'not found'}",
                 f"document_retrieval_score: {document_score}",
+                f"gold evidence rank: {evidence_rank if evidence_rank is not None else 'not found'}",
+                f"evidence_retrieval_score: {evidence_score}",
                 f"gold answer keyword clue found: {clue_found}",
                 f"matched keywords: {', '.join(matched_keywords) if matched_keywords else 'none'}",
                 "",
@@ -387,7 +493,10 @@ def run_benchmark(args: argparse.Namespace) -> list[str]:
             f"Gold@1: {gold_at_1}/{len(BENCHMARK_QUERIES)}",
             f"Gold@3: {gold_at_3}/{len(BENCHMARK_QUERIES)}",
             f"Document retrieval score: {total_document_score}/{len(BENCHMARK_QUERIES) * 2}",
-            "Document retrieval score is a retrieval-only metric, not the final lab score.",
+            f"Evidence@1: {evidence_at_1}/{len(BENCHMARK_QUERIES)}",
+            f"Evidence@3: {evidence_at_3}/{len(BENCHMARK_QUERIES)}",
+            f"Evidence retrieval score: {total_evidence_score}/{len(BENCHMARK_QUERIES) * 2}",
+            "Document and evidence retrieval are separate metrics; evidence is stricter.",
         ]
     )
     return lines
@@ -399,7 +508,7 @@ def parse_args() -> argparse.Namespace:
         description="Benchmark ecommerce-policy document retrieval."
     )
     parser.add_argument(
-        "--chunker", choices=("recursive", "fixed", "sentence"), default="recursive"
+        "--chunker", choices=("recursive", "fixed", "sentence", "heading"), default="recursive"
     )
     parser.add_argument(
         "--embedding", choices=("mock", "local", "openai", "gemini"), default="local"

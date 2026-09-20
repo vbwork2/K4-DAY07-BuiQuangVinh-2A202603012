@@ -3,55 +3,23 @@
 from __future__ import annotations
 
 import argparse
-import re
 import sys
-import unicodedata
 from pathlib import Path
 from typing import Any
 
 from bench import (
     BENCHMARK_QUERIES,
+    EVIDENCE_MARKERS,
     build_store,
+    contains_evidence,
     create_embedder,
+    gold_evidence_rank,
     gold_rank,
     load_source_documents,
     preview,
 )
 from heading_chunker import HeadingRecursiveChunker
 from src import FixedSizeChunker, RecursiveChunker, SentenceChunker
-
-
-# Markers were selected from the gold evidence for the queries currently
-# defined in bench.py. A chunk must contain every marker to count as evidence.
-EVIDENCE_MARKERS = {
-    "Q1": ["Hoàn Tiền Ngay", "vòng 6 ngày"],
-    "Q2": ["phí vận chuyển ban đầu", "không được hoàn lại"],
-    "Q3": ["video mở kiện hàng", "liên tục"],
-    "Q4": ["48 giờ", "hoàn tiền cho khách hàng hoặc đổi sản phẩm"],
-    "Q5": ["1 ngày làm việc", "mã vận đơn"],
-}
-
-
-def normalise_text(value: str) -> str:
-    """Normalise Unicode case and whitespace for deterministic marker checks."""
-    return re.sub(r"\s+", " ", unicodedata.normalize("NFKC", value).casefold()).strip()
-
-
-def contains_evidence(result: dict[str, Any], markers: list[str]) -> bool:
-    """Return true only when a retrieved chunk contains all required markers."""
-    content = normalise_text(result["content"])
-    return all(normalise_text(marker) in content for marker in markers)
-
-
-def gold_evidence_rank(
-    results: list[dict[str, Any]], gold_doc_ids: list[str], markers: list[str]
-) -> int | None:
-    """Find the first result that is both a gold document and evidence-bearing."""
-    gold_ids = set(gold_doc_ids)
-    for rank, result in enumerate(results, start=1):
-        if result["metadata"].get("doc_id") in gold_ids and contains_evidence(result, markers):
-            return rank
-    return None
 
 
 def create_chunker(name: str):
@@ -89,10 +57,11 @@ def score_from_rank(rank: int | None) -> int:
     return 0
 
 
-def run_strategy(strategy: str, embedding_name: str, top_k: int) -> tuple[list[str], dict[str, int]]:
+def run_strategy(
+    strategy: str, embedder: Any, embedding_name: str, top_k: int
+) -> tuple[list[str], dict[str, int]]:
     """Run one chunking strategy against all benchmark queries."""
     documents = load_source_documents()
-    embedder = create_embedder(embedding_name)
     store, chunk_count = build_store(documents, create_chunker(strategy), embedder)
     backend_name = getattr(embedder, "_backend_name", embedder.__class__.__name__)
     lines = [
@@ -198,8 +167,11 @@ def main() -> int:
     lines: list[str] = []
     summaries: dict[str, dict[str, int]] = {}
     try:
+        embedder = create_embedder(args.embedding)
         for strategy in strategies:
-            strategy_lines, summaries[strategy] = run_strategy(strategy, args.embedding, args.top_k)
+            strategy_lines, summaries[strategy] = run_strategy(
+                strategy, embedder, args.embedding, args.top_k
+            )
             lines.extend(strategy_lines)
         if args.all_chunkers:
             lines.extend(

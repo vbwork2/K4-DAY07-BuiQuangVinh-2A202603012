@@ -1,484 +1,623 @@
 Ecommerce retrieval benchmark
-timestamp: 2026-09-20T03:52:00.408583+00:00
+timestamp: 2026-09-20T05:24:33.733868+00:00
 embedding backend: local (sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)
-chunker: recursive
-parameters: {'chunk_size': 500, 'separators': ['\n\n', '\n', '. ', ' ', '']}
+chunker: heading
+parameters: {'chunk_size': 500, 'section_aware': True}
 number of source documents: 8
-number of chunks: 198
+number of chunks: 232
 top_k: 3
 
+PREPROCESSING
+shopee-request-processing | raw_chars=8114 | clean_chars=8044 | removed_chars=70
+shopee-return-evidence | raw_chars=3469 | clean_chars=3402 | removed_chars=67
+shopee-return-refund-policy | raw_chars=19616 | clean_chars=19555 | removed_chars=61
+shopee-return-shipping-fees | raw_chars=5933 | clean_chars=5869 | removed_chars=64
+tiktok-aftersales-disputes | raw_chars=7267 | clean_chars=7152 | removed_chars=115
+tiktok-change-of-mind | raw_chars=9136 | clean_chars=9095 | removed_chars=41
+tiktok-returns-refunds | raw_chars=20085 | clean_chars=20082 | removed_chars=3
+tiktok-seller-to-customer-returns | raw_chars=5468 | clean_chars=5427 | removed_chars=41
+
 QUERY Q1
-query: Người mua Shopee có thể gửi yêu cầu trả hàng hoặc hoàn tiền trong bao lâu kể từ khi đơn hàng được giao thành công?
-Gold answer: Thông thường là 15 ngày kể từ lúc đơn hàng được cập nhật giao thành công; riêng thực phẩm tươi sống và đông lạnh là 24 giờ.
-Gold document: shopee-return-refund-policy
-Metadata filter: {'audience': 'both'}
+query: Khi Shopee chấp nhận yêu cầu, Hoàn Tiền Ngay và Trả hàng & Hoàn tiền khác nhau như thế nào?
+Gold answer: Hoàn Tiền Ngay không yêu cầu người mua trả hàng; với Trả hàng & Hoàn tiền, người mua phải chọn phương thức trả hàng và gửi hàng về kho Shopee hoặc người bán trong vòng 6 ngày từ khi nhận thông báo.
+Gold document: shopee-request-processing
+Metadata filter: {'platform': 'shopee'}
+Evidence markers: ['Hoàn Tiền Ngay', 'vòng 6 ngày']
 
 TOP 1
 rank: 1
-score: 0.801810
-doc_id: shopee-return-refund-policy
-title: Chính sách trả hàng và hoàn tiền Shopee
+score: 0.782042
+doc_id: shopee-request-processing
+title: Quy trình Shopee xử lý yêu cầu trả hàng và hoàn tiền
+platform: shopee
 audience: both
-category: return-refund
-chunk_index: 29
-content preview: Người Bán cần gửi phản hồi trong vòng 02 ngày lịch (hoặc thời hạn khác được quy định bởi Shopee trong từng thời điểm) kể từ ngày nhận được thông báo của Shopee nếu không đồng ý với quyết định hoàn tiền của Shopee hoặc chưa nhận được Sản Phẩm Hoàn Trả/Sản Phẩm Hoàn Trả không thuộc các trường hợp m...
+category: return-process
+chunk_index: 1
+content preview: 1. Nguyên tắc chung Tùy từng trường hợp cụ thể, yêu cầu Trả hàng/ Hoàn tiền của bạn sẽ được Shopee chấp nhận cho Trả hàng ngay sau khi gửi yêu cầu hoặc được chuyển trạng thái Shopee đang xem xét
 
 TOP 2
 rank: 2
-score: 0.797591
-doc_id: shopee-request-processing
-title: Quy trình Shopee xử lý yêu cầu trả hàng và hoàn tiền
+score: 0.778062
+doc_id: shopee-return-refund-policy
+title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
 audience: both
-category: return-process
-chunk_index: 6
-content preview: Nếu Shopee đồng ý Hoàn Tiền Ngay: bạn sẽ nhận được tiền hoàn mà không cần trả hàng Nếu Shopee đồng ý cho bạn Trả hàng & Hoàn tiền: Bạn cần chọn hình thức trả hàng và hoàn tất việc gửi trả hàng về kho Shopee/Người bán trong vòng 6 ngày kể từ thời điểm nhận được thông báo gửi trả hàng từ Shopee. 4....
+category: return-refund
+chunk_index: 14
+content preview: 3.1. Người Mua đồng ý rằng Người Mua chỉ có thể yêu cầu trả hàng/hoàn tiền trong các trường hợp sau: 3.3. Đối với các đơn hàng được thanh toán bằng hình thức Thanh toán khi nhận hàng (COD) và/hoặc Chuyển khoản ngân hàng, tài khoản Shopee của Người Mua phải liên kết với các phương thức nhận hoàn t...
 
 TOP 3
 rank: 3
-score: 0.791234
-doc_id: tiktok-returns-refunds
-title: Chính sách trả hàng và hoàn tiền TikTok Shop
+score: 0.759755
+doc_id: shopee-return-refund-policy
+title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
 audience: both
 category: return-refund
-chunk_index: 8
-content preview: Đối với trả hàng tự sắp xếp: Người bán có thể gửi khiếu nại trong vòng 15 ngày dương lịch kể từ ngày khách hàng gửi hàng trả về. Trả hàng sản phẩm Người mua phải tuân thủ các mốc thời gian sau, nếu không yêu cầu sẽ bị hủy. Lấy hàng: Ngày lấy hàng phải được chọn trong vòng 3 ngày dương lịch Gửi tạ...
+chunk_index: 63
+content preview: 11. TRANH CHẤP GIỮA NGƯỜI MUA VÀ NGƯỜI BÁN Trong trường hợp khoản tiền thanh toán này đã được trả cho Người Bán theo Chính Sách Shopee Đảm Bảo, Shopee có quyền điều chỉnh số tiền đã thanh toán sau khi có quyết định cuối cùng về việc giải quyết tranh chấp giữa Người bán và Người mua.
 
 gold rank: 1
 document_retrieval_score: 2
+gold evidence rank: not found
+evidence_retrieval_score: 0
 gold answer keyword clue found: True
-matched keywords: hàng, ngày, phẩm, thông, được
+matched keywords: hoàn, hoặc, hàng, ngay, người, nhận, phương, phải, shopee, thức, tiền, trong
 
 A/B METADATA FILTER COMPARISON
 Unfiltered top-3:
 TOP 1
 rank: 1
-score: 0.801810
-doc_id: shopee-return-refund-policy
-title: Chính sách trả hàng và hoàn tiền Shopee
+score: 0.782042
+doc_id: shopee-request-processing
+title: Quy trình Shopee xử lý yêu cầu trả hàng và hoàn tiền
+platform: shopee
 audience: both
-category: return-refund
-chunk_index: 29
-content preview: Người Bán cần gửi phản hồi trong vòng 02 ngày lịch (hoặc thời hạn khác được quy định bởi Shopee trong từng thời điểm) kể từ ngày nhận được thông báo của Shopee nếu không đồng ý với quyết định hoàn tiền của Shopee hoặc chưa nhận được Sản Phẩm Hoàn Trả/Sản Phẩm Hoàn Trả không thuộc các trường hợp m...
+category: return-process
+chunk_index: 1
+content preview: 1. Nguyên tắc chung Tùy từng trường hợp cụ thể, yêu cầu Trả hàng/ Hoàn tiền của bạn sẽ được Shopee chấp nhận cho Trả hàng ngay sau khi gửi yêu cầu hoặc được chuyển trạng thái Shopee đang xem xét
 
 TOP 2
 rank: 2
-score: 0.797591
-doc_id: shopee-request-processing
-title: Quy trình Shopee xử lý yêu cầu trả hàng và hoàn tiền
+score: 0.778062
+doc_id: shopee-return-refund-policy
+title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
 audience: both
-category: return-process
-chunk_index: 6
-content preview: Nếu Shopee đồng ý Hoàn Tiền Ngay: bạn sẽ nhận được tiền hoàn mà không cần trả hàng Nếu Shopee đồng ý cho bạn Trả hàng & Hoàn tiền: Bạn cần chọn hình thức trả hàng và hoàn tất việc gửi trả hàng về kho Shopee/Người bán trong vòng 6 ngày kể từ thời điểm nhận được thông báo gửi trả hàng từ Shopee. 4....
+category: return-refund
+chunk_index: 14
+content preview: 3.1. Người Mua đồng ý rằng Người Mua chỉ có thể yêu cầu trả hàng/hoàn tiền trong các trường hợp sau: 3.3. Đối với các đơn hàng được thanh toán bằng hình thức Thanh toán khi nhận hàng (COD) và/hoặc Chuyển khoản ngân hàng, tài khoản Shopee của Người Mua phải liên kết với các phương thức nhận hoàn t...
 
 TOP 3
 rank: 3
-score: 0.791234
-doc_id: tiktok-returns-refunds
-title: Chính sách trả hàng và hoàn tiền TikTok Shop
+score: 0.759755
+doc_id: shopee-return-refund-policy
+title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
 audience: both
 category: return-refund
-chunk_index: 8
-content preview: Đối với trả hàng tự sắp xếp: Người bán có thể gửi khiếu nại trong vòng 15 ngày dương lịch kể từ ngày khách hàng gửi hàng trả về. Trả hàng sản phẩm Người mua phải tuân thủ các mốc thời gian sau, nếu không yêu cầu sẽ bị hủy. Lấy hàng: Ngày lấy hàng phải được chọn trong vòng 3 ngày dương lịch Gửi tạ...
+chunk_index: 63
+content preview: 11. TRANH CHẤP GIỮA NGƯỜI MUA VÀ NGƯỜI BÁN Trong trường hợp khoản tiền thanh toán này đã được trả cho Người Bán theo Chính Sách Shopee Đảm Bảo, Shopee có quyền điều chỉnh số tiền đã thanh toán sau khi có quyết định cuối cùng về việc giải quyết tranh chấp giữa Người bán và Người mua.
 
 Filtered top-3:
 TOP 1
 rank: 1
-score: 0.801810
-doc_id: shopee-return-refund-policy
-title: Chính sách trả hàng và hoàn tiền Shopee
+score: 0.782042
+doc_id: shopee-request-processing
+title: Quy trình Shopee xử lý yêu cầu trả hàng và hoàn tiền
+platform: shopee
 audience: both
-category: return-refund
-chunk_index: 29
-content preview: Người Bán cần gửi phản hồi trong vòng 02 ngày lịch (hoặc thời hạn khác được quy định bởi Shopee trong từng thời điểm) kể từ ngày nhận được thông báo của Shopee nếu không đồng ý với quyết định hoàn tiền của Shopee hoặc chưa nhận được Sản Phẩm Hoàn Trả/Sản Phẩm Hoàn Trả không thuộc các trường hợp m...
+category: return-process
+chunk_index: 1
+content preview: 1. Nguyên tắc chung Tùy từng trường hợp cụ thể, yêu cầu Trả hàng/ Hoàn tiền của bạn sẽ được Shopee chấp nhận cho Trả hàng ngay sau khi gửi yêu cầu hoặc được chuyển trạng thái Shopee đang xem xét
 
 TOP 2
 rank: 2
-score: 0.797591
-doc_id: shopee-request-processing
-title: Quy trình Shopee xử lý yêu cầu trả hàng và hoàn tiền
+score: 0.778062
+doc_id: shopee-return-refund-policy
+title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
 audience: both
-category: return-process
-chunk_index: 6
-content preview: Nếu Shopee đồng ý Hoàn Tiền Ngay: bạn sẽ nhận được tiền hoàn mà không cần trả hàng Nếu Shopee đồng ý cho bạn Trả hàng & Hoàn tiền: Bạn cần chọn hình thức trả hàng và hoàn tất việc gửi trả hàng về kho Shopee/Người bán trong vòng 6 ngày kể từ thời điểm nhận được thông báo gửi trả hàng từ Shopee. 4....
+category: return-refund
+chunk_index: 14
+content preview: 3.1. Người Mua đồng ý rằng Người Mua chỉ có thể yêu cầu trả hàng/hoàn tiền trong các trường hợp sau: 3.3. Đối với các đơn hàng được thanh toán bằng hình thức Thanh toán khi nhận hàng (COD) và/hoặc Chuyển khoản ngân hàng, tài khoản Shopee của Người Mua phải liên kết với các phương thức nhận hoàn t...
 
 TOP 3
 rank: 3
-score: 0.791234
-doc_id: tiktok-returns-refunds
-title: Chính sách trả hàng và hoàn tiền TikTok Shop
+score: 0.759755
+doc_id: shopee-return-refund-policy
+title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
 audience: both
 category: return-refund
-chunk_index: 8
-content preview: Đối với trả hàng tự sắp xếp: Người bán có thể gửi khiếu nại trong vòng 15 ngày dương lịch kể từ ngày khách hàng gửi hàng trả về. Trả hàng sản phẩm Người mua phải tuân thủ các mốc thời gian sau, nếu không yêu cầu sẽ bị hủy. Lấy hàng: Ngày lấy hàng phải được chọn trong vòng 3 ngày dương lịch Gửi tạ...
+chunk_index: 63
+content preview: 11. TRANH CHẤP GIỮA NGƯỜI MUA VÀ NGƯỜI BÁN Trong trường hợp khoản tiền thanh toán này đã được trả cho Người Bán theo Chính Sách Shopee Đảm Bảo, Shopee có quyền điều chỉnh số tiền đã thanh toán sau khi có quyết định cuối cùng về việc giải quyết tranh chấp giữa Người bán và Người mua.
 
 Gold rank before: 1
 Gold rank after: 1
 
 QUERY Q2
-query: Người bán Shopee có bao lâu để phản hồi nếu không đồng ý với quyết định hoàn tiền hoặc có vấn đề với sản phẩm hoàn trả?
-Gold answer: 02 ngày lịch kể từ ngày nhận được thông báo của Shopee, trừ khi Shopee quy định một thời hạn khác.
-Gold document: shopee-return-refund-policy
-Metadata filter: None
+query: Shopee có hoàn phí vận chuyển ban đầu khi người mua chỉ trả lại một số sản phẩm trong đơn không?
+Gold answer: Không. Phí vận chuyển ban đầu chỉ được hoàn khi yêu cầu áp dụng cho toàn bộ sản phẩm và toàn bộ giá trị đã thanh toán được hoàn; nếu chỉ trả một số sản phẩm thì phí này không được hoàn.
+Gold document: shopee-return-shipping-fees
+Metadata filter: {'platform': 'shopee'}
+Evidence markers: ['phí vận chuyển ban đầu', 'không được hoàn lại']
 
 TOP 1
 rank: 1
-score: 0.858629
+score: 0.787984
 doc_id: shopee-return-refund-policy
 title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
 audience: both
 category: return-refund
-chunk_index: 29
-content preview: Người Bán cần gửi phản hồi trong vòng 02 ngày lịch (hoặc thời hạn khác được quy định bởi Shopee trong từng thời điểm) kể từ ngày nhận được thông báo của Shopee nếu không đồng ý với quyết định hoàn tiền của Shopee hoặc chưa nhận được Sản Phẩm Hoàn Trả/Sản Phẩm Hoàn Trả không thuộc các trường hợp m...
+chunk_index: 39
+content preview: 7.1. Người Bán sẽ chịu chi phí vận chuyển cho việc trả hàng chiều hoàn trả sản phẩm đối với: đơn yêu cầu trả hàng/hoàn tiền trong trường hợp Shopee chấp thuận (theo quyết định riêng của Shopee) mà không do lỗi của Người Mua hoặc đơn vị vận chuyển, đơn giao không thành công, và các trường hợp ngoạ...
 
 TOP 2
 rank: 2
-score: 0.797920
-doc_id: shopee-request-processing
-title: Quy trình Shopee xử lý yêu cầu trả hàng và hoàn tiền
-audience: both
-category: return-process
-chunk_index: 6
-content preview: Nếu Shopee đồng ý Hoàn Tiền Ngay: bạn sẽ nhận được tiền hoàn mà không cần trả hàng Nếu Shopee đồng ý cho bạn Trả hàng & Hoàn tiền: Bạn cần chọn hình thức trả hàng và hoàn tất việc gửi trả hàng về kho Shopee/Người bán trong vòng 6 ngày kể từ thời điểm nhận được thông báo gửi trả hàng từ Shopee. 4....
-
-TOP 3
-rank: 3
-score: 0.760873
+score: 0.780785
 doc_id: shopee-return-refund-policy
 title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
 audience: both
 category: return-refund
-chunk_index: 49
-content preview: 11.1. Trong trường hợp Người Mua và Người Bán không thể đồng thuận về phương án giải quyết, Người Mua và Người Bán có thể khiếu nại việc này lên các Cơ quan chức năng để giải quyết. 11.2. Nếu một bên khiếu nại bên kia tới các Cơ quan chức năng, bên khiếu nại cần thông báo kịp thời với Shopee về v...
-
-gold rank: 1
-document_retrieval_score: 2
-gold answer keyword clue found: True
-matched keywords: khác, lịch, ngày, nhận, shopee, thông, thời, được, định
-
-QUERY Q3
-query: Khi Shopee yêu cầu bổ sung bằng chứng cho yêu cầu trả hàng hoặc hoàn tiền, người mua phải bổ sung trong bao lâu?
-Gold answer: Trong vòng 24 giờ sau khi nhận được thông báo.
-Gold document: shopee-return-evidence
-Metadata filter: {'audience': 'buyer'}
-
-TOP 1
-rank: 1
-score: 0.680309
-doc_id: shopee-return-evidence
-title: Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền Shopee
-audience: buyer
-category: return-evidence
-chunk_index: 7
-content preview: Chi tiết: Chụp/quay cận cảnh lỗi hoặc điểm bất thường của sản phẩm. Bằng chứng bổ sung: Nếu có, bạn có thể cung cấp thêm lịch sử chat với người bán hoặc các bằng chứng khác để Shopee có thêm thông tin xử lý. Nếu Shopee cần thêm bằng chứng khác, bạn sẽ nhận được thông báo trong mục Thông báo > Cập...
-
-TOP 2
-rank: 2
-score: 0.677052
-doc_id: shopee-return-shipping-fees
-title: Phương thức gửi hàng hoàn trả và phí hoàn trả Shopee
-audience: buyer
-category: return-shipping
-chunk_index: 12
-content preview: Phí trả hàng vẫn có thể được hỗ trợ nếu bạn chọn trả hàng qua các đơn vị vận chuyển hỏa tốc như Grab Express, Ahamove, Be... Tuy nhiên, nếu Người bán có khiếu nại về hàng hoàn trả và Shopee không thể kiểm tra được hành trình đơn hàng hoàn trả của bạn, phí trả hàng sẽ KHÔNG được hoàn lại cho trườn...
+chunk_index: 50
+content preview: 9.1. Shopee sẽ chỉ hoàn tiền cho Người Mua thuộc một trong các trường hợp sau: Đơn hàng của Người Mua đủ điều kiện được trả hàng/hoàn tiền và Shopee quyết định cho Người Mua được hoàn tiền khi Người Mua đã gửi trả Sản Phẩm cho đơn vị vận chuyển và đơn vị vận chuyển xác nhận đã nhận được Sản Phẩm ...
 
 TOP 3
 rank: 3
-score: 0.665488
-doc_id: shopee-return-shipping-fees
-title: Phương thức gửi hàng hoàn trả và phí hoàn trả Shopee
-audience: buyer
-category: return-shipping
-chunk_index: 9
-content preview: Nếu bạn trả hàng qua hình thức Tự sắp xếp, bạn cần thanh toán trước phí trả hàng. Shopee sẽ hỗ trợ bạn phí trả hàng trong vòng 3 - 5 ngày làm việc (không kể Thứ 7, Chủ nhật, Ngày lễ & Tết) cụ thể như sau: Đối với đơn hàng thuộc Shopee Mall: Shopee sẽ hoàn lại bạn khoản phí này sau khi yêu cầu trả...
+score: 0.756291
+doc_id: shopee-return-refund-policy
+title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
+audience: both
+category: return-refund
+chunk_index: 56
+content preview: 9.3. Shopee sẽ tự động hoàn tiền cho Người Mua trong trường hợp Người Bán không phản hồi trong khoảng thời gian đã được quy định trước. 9.5. Đối với các trường hợp hoàn tiền ngay do Người Bán đề xuất, số tiền hoàn trả sẽ do hai Bên tự thỏa thuận với nhau nhưng không được thấp hơn 50% giá tr...
 
-gold rank: 1
-document_retrieval_score: 2
+gold rank: not found
+document_retrieval_score: 0
+gold evidence rank: not found
+evidence_retrieval_score: 0
 gold answer keyword clue found: True
-matched keywords: nhận, thông, trong, vòng, được
+matched keywords: chuyển, hoàn, không, phẩm, được
 
 A/B METADATA FILTER COMPARISON
 Unfiltered top-3:
 TOP 1
 rank: 1
-score: 0.796601
+score: 0.787984
 doc_id: shopee-return-refund-policy
 title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
 audience: both
 category: return-refund
-chunk_index: 29
-content preview: Người Bán cần gửi phản hồi trong vòng 02 ngày lịch (hoặc thời hạn khác được quy định bởi Shopee trong từng thời điểm) kể từ ngày nhận được thông báo của Shopee nếu không đồng ý với quyết định hoàn tiền của Shopee hoặc chưa nhận được Sản Phẩm Hoàn Trả/Sản Phẩm Hoàn Trả không thuộc các trường hợp m...
+chunk_index: 39
+content preview: 7.1. Người Bán sẽ chịu chi phí vận chuyển cho việc trả hàng chiều hoàn trả sản phẩm đối với: đơn yêu cầu trả hàng/hoàn tiền trong trường hợp Shopee chấp thuận (theo quyết định riêng của Shopee) mà không do lỗi của Người Mua hoặc đơn vị vận chuyển, đơn giao không thành công, và các trường hợp ngoạ...
 
 TOP 2
 rank: 2
-score: 0.771886
-doc_id: shopee-request-processing
-title: Quy trình Shopee xử lý yêu cầu trả hàng và hoàn tiền
+score: 0.780785
+doc_id: shopee-return-refund-policy
+title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
 audience: both
-category: return-process
-chunk_index: 6
-content preview: Nếu Shopee đồng ý Hoàn Tiền Ngay: bạn sẽ nhận được tiền hoàn mà không cần trả hàng Nếu Shopee đồng ý cho bạn Trả hàng & Hoàn tiền: Bạn cần chọn hình thức trả hàng và hoàn tất việc gửi trả hàng về kho Shopee/Người bán trong vòng 6 ngày kể từ thời điểm nhận được thông báo gửi trả hàng từ Shopee. 4....
+category: return-refund
+chunk_index: 50
+content preview: 9.1. Shopee sẽ chỉ hoàn tiền cho Người Mua thuộc một trong các trường hợp sau: Đơn hàng của Người Mua đủ điều kiện được trả hàng/hoàn tiền và Shopee quyết định cho Người Mua được hoàn tiền khi Người Mua đã gửi trả Sản Phẩm cho đơn vị vận chuyển và đơn vị vận chuyển xác nhận đã nhận được Sản Phẩm ...
 
 TOP 3
 rank: 3
-score: 0.750246
-doc_id: tiktok-returns-refunds
-title: Chính sách trả hàng và hoàn tiền TikTok Shop
+score: 0.756291
+doc_id: shopee-return-refund-policy
+title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
 audience: both
 category: return-refund
-chunk_index: 7
-content preview: Đề nghị hoàn tiền một phần Lưu ý: Một số yêu cầu sẽ được nền tảng xử lý tự động. Tuy nhiên, Người bán có thể khiếu nại tùy thuộc vào loại yêu cầu: Đối với các yêu cầu chỉ hoàn tiền, người bán có thể khiếu nại trong vòng 15 ngày dương lịch kể từ khi hoàn tiền được xử lý. Đối với các yêu cầu chỉ ho...
+chunk_index: 56
+content preview: 9.3. Shopee sẽ tự động hoàn tiền cho Người Mua trong trường hợp Người Bán không phản hồi trong khoảng thời gian đã được quy định trước. 9.5. Đối với các trường hợp hoàn tiền ngay do Người Bán đề xuất, số tiền hoàn trả sẽ do hai Bên tự thỏa thuận với nhau nhưng không được thấp hơn 50% giá tr...
 
 Filtered top-3:
 TOP 1
 rank: 1
-score: 0.680309
-doc_id: shopee-return-evidence
-title: Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền Shopee
-audience: buyer
-category: return-evidence
-chunk_index: 7
-content preview: Chi tiết: Chụp/quay cận cảnh lỗi hoặc điểm bất thường của sản phẩm. Bằng chứng bổ sung: Nếu có, bạn có thể cung cấp thêm lịch sử chat với người bán hoặc các bằng chứng khác để Shopee có thêm thông tin xử lý. Nếu Shopee cần thêm bằng chứng khác, bạn sẽ nhận được thông báo trong mục Thông báo > Cập...
+score: 0.787984
+doc_id: shopee-return-refund-policy
+title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
+audience: both
+category: return-refund
+chunk_index: 39
+content preview: 7.1. Người Bán sẽ chịu chi phí vận chuyển cho việc trả hàng chiều hoàn trả sản phẩm đối với: đơn yêu cầu trả hàng/hoàn tiền trong trường hợp Shopee chấp thuận (theo quyết định riêng của Shopee) mà không do lỗi của Người Mua hoặc đơn vị vận chuyển, đơn giao không thành công, và các trường hợp ngoạ...
 
 TOP 2
 rank: 2
-score: 0.677052
-doc_id: shopee-return-shipping-fees
-title: Phương thức gửi hàng hoàn trả và phí hoàn trả Shopee
-audience: buyer
-category: return-shipping
-chunk_index: 12
-content preview: Phí trả hàng vẫn có thể được hỗ trợ nếu bạn chọn trả hàng qua các đơn vị vận chuyển hỏa tốc như Grab Express, Ahamove, Be... Tuy nhiên, nếu Người bán có khiếu nại về hàng hoàn trả và Shopee không thể kiểm tra được hành trình đơn hàng hoàn trả của bạn, phí trả hàng sẽ KHÔNG được hoàn lại cho trườn...
+score: 0.780785
+doc_id: shopee-return-refund-policy
+title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
+audience: both
+category: return-refund
+chunk_index: 50
+content preview: 9.1. Shopee sẽ chỉ hoàn tiền cho Người Mua thuộc một trong các trường hợp sau: Đơn hàng của Người Mua đủ điều kiện được trả hàng/hoàn tiền và Shopee quyết định cho Người Mua được hoàn tiền khi Người Mua đã gửi trả Sản Phẩm cho đơn vị vận chuyển và đơn vị vận chuyển xác nhận đã nhận được Sản Phẩm ...
 
 TOP 3
 rank: 3
-score: 0.665488
-doc_id: shopee-return-shipping-fees
-title: Phương thức gửi hàng hoàn trả và phí hoàn trả Shopee
-audience: buyer
-category: return-shipping
-chunk_index: 9
-content preview: Nếu bạn trả hàng qua hình thức Tự sắp xếp, bạn cần thanh toán trước phí trả hàng. Shopee sẽ hỗ trợ bạn phí trả hàng trong vòng 3 - 5 ngày làm việc (không kể Thứ 7, Chủ nhật, Ngày lễ & Tết) cụ thể như sau: Đối với đơn hàng thuộc Shopee Mall: Shopee sẽ hoàn lại bạn khoản phí này sau khi yêu cầu trả...
+score: 0.756291
+doc_id: shopee-return-refund-policy
+title: Chính sách trả hàng và hoàn tiền Shopee
+platform: shopee
+audience: both
+category: return-refund
+chunk_index: 56
+content preview: 9.3. Shopee sẽ tự động hoàn tiền cho Người Mua trong trường hợp Người Bán không phản hồi trong khoảng thời gian đã được quy định trước. 9.5. Đối với các trường hợp hoàn tiền ngay do Người Bán đề xuất, số tiền hoàn trả sẽ do hai Bên tự thỏa thuận với nhau nhưng không được thấp hơn 50% giá tr...
 
 Gold rank before: not found
+Gold rank after: not found
+
+QUERY Q3
+query: Người mua Shopee nên chuẩn bị những bằng chứng nào khi sản phẩm bị lỗi, hư hỏng hoặc khác mô tả?
+Gold answer: Người mua nên quay hoặc chụp toàn bộ kiện hàng, thông tin vận chuyển và niêm phong; video mở kiện nên liên tục và thể hiện rõ quá trình mở gói, tình trạng sản phẩm cùng lỗi, hư hỏng, thiếu hàng hoặc điểm khác mô tả.
+Gold document: shopee-return-evidence
+Metadata filter: {'audience': 'buyer'}
+Evidence markers: ['video mở kiện hàng', 'liên tục']
+
+TOP 1
+rank: 1
+score: 0.716814
+doc_id: shopee-return-evidence
+title: Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền Shopee
+platform: shopee
+audience: buyer
+category: return-evidence
+chunk_index: 9
+content preview: 4. Quy định về bằng chứng Chi tiết: Chụp/quay cận cảnh lỗi hoặc điểm bất thường của sản phẩm. Bằng chứng bổ sung: Nếu có, bạn có thể cung cấp thêm lịch sử chat với người bán hoặc các bằng chứng khác để Shopee có thêm thông tin xử lý. Nếu Shopee cần thêm bằng chứng khác, bạn sẽ nhận được thông báo...
+
+TOP 2
+rank: 2
+score: 0.657160
+doc_id: shopee-return-evidence
+title: Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền Shopee
+platform: shopee
+audience: buyer
+category: return-evidence
+chunk_index: 6
+content preview: 3. Khiếu nại hàng giả/nhái Đối với trường hợp đặc biệt này, bạn cần chuẩn bị thêm bằng chứng chứng minh sản phẩm nhận được là hàng giả/nhái. Dưới đây là một số ví dụ về bằng chứng bạn có thể cung cấp: Loại bằng chứng Cách thực hiện Quét mã QR/ Kiểm tra số seri Quay video quét mã QR, kiểm tra số s...
+
+TOP 3
+rank: 3
+score: 0.601826
+doc_id: shopee-return-evidence
+title: Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền Shopee
+platform: shopee
+audience: buyer
+category: return-evidence
+chunk_index: 3
+content preview: 2. Đã nhận được hàng, khiếu nại hàng có vấn đề (bể vỡ, sai mẫu, hàng lỗi, khác mô tả,...) Trong các trường hợp đã nhận hàng nhưng gặp vấn đề, Shopee khuyến khích bạn chuẩn bị bằng chứng là video mở kiện hàng. Video này sẽ là bằng chứng mạnh nhất để giải quyết khiếu nại của bạn. Video cần đảm bảo ...
+
+gold rank: 1
+document_retrieval_score: 2
+gold evidence rank: 3
+evidence_retrieval_score: 1
+gold answer keyword clue found: True
+matched keywords: chụp, hiện, hoặc, hàng, khác, kiện, liên, người, phẩm, quay, thông, video, điểm
+
+A/B METADATA FILTER COMPARISON
+Unfiltered top-3:
+TOP 1
+rank: 1
+score: 0.747850
+doc_id: shopee-request-processing
+title: Quy trình Shopee xử lý yêu cầu trả hàng và hoàn tiền
+platform: shopee
+audience: both
+category: return-process
+chunk_index: 9
+content preview: 4. Tiêu chí đánh giá tình trạng hàng hoàn trả của Shopee cho từng lý do khiếu nại Shopee sẽ kiểm tra tình trạng hàng hoàn trả dựa trên lý do của yêu cầu Trả hàng/Hoàn tiền và những bằng chứng được cung cấp. Chi tiết các điều kiện tham khảo dưới đây: Lý do khiếu nại Điều kiện áp dụng Lưu ý Chưa sử...
+
+TOP 2
+rank: 2
+score: 0.721905
+doc_id: tiktok-aftersales-disputes
+title: Nâng cấp tranh chấp hậu mãi trên TikTok Shop
+platform: tiktok_shop
+audience: seller
+category: aftersales-dispute
+chunk_index: 3
+content preview: # Nâng cấp tranh chấp hậu mãi trên TikTok Shop Sản phẩm có vẻ là hàng giả hoặc có vấn đề về chất lượng hoặc vấn đề về tính an toàn của sản phẩm – bằng chứng liên quan (ví dụ: báo cáo kiểm nghiệm do nhà sản xuất, phòng thí nghiệm bên thứ ba hoặc cơ quan có thẩm quyền cấp) chứng minh rằng sản phẩm ...
+
+TOP 3
+rank: 3
+score: 0.716814
+doc_id: shopee-return-evidence
+title: Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền Shopee
+platform: shopee
+audience: buyer
+category: return-evidence
+chunk_index: 9
+content preview: 4. Quy định về bằng chứng Chi tiết: Chụp/quay cận cảnh lỗi hoặc điểm bất thường của sản phẩm. Bằng chứng bổ sung: Nếu có, bạn có thể cung cấp thêm lịch sử chat với người bán hoặc các bằng chứng khác để Shopee có thêm thông tin xử lý. Nếu Shopee cần thêm bằng chứng khác, bạn sẽ nhận được thông báo...
+
+Filtered top-3:
+TOP 1
+rank: 1
+score: 0.716814
+doc_id: shopee-return-evidence
+title: Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền Shopee
+platform: shopee
+audience: buyer
+category: return-evidence
+chunk_index: 9
+content preview: 4. Quy định về bằng chứng Chi tiết: Chụp/quay cận cảnh lỗi hoặc điểm bất thường của sản phẩm. Bằng chứng bổ sung: Nếu có, bạn có thể cung cấp thêm lịch sử chat với người bán hoặc các bằng chứng khác để Shopee có thêm thông tin xử lý. Nếu Shopee cần thêm bằng chứng khác, bạn sẽ nhận được thông báo...
+
+TOP 2
+rank: 2
+score: 0.657160
+doc_id: shopee-return-evidence
+title: Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền Shopee
+platform: shopee
+audience: buyer
+category: return-evidence
+chunk_index: 6
+content preview: 3. Khiếu nại hàng giả/nhái Đối với trường hợp đặc biệt này, bạn cần chuẩn bị thêm bằng chứng chứng minh sản phẩm nhận được là hàng giả/nhái. Dưới đây là một số ví dụ về bằng chứng bạn có thể cung cấp: Loại bằng chứng Cách thực hiện Quét mã QR/ Kiểm tra số seri Quay video quét mã QR, kiểm tra số s...
+
+TOP 3
+rank: 3
+score: 0.601826
+doc_id: shopee-return-evidence
+title: Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền Shopee
+platform: shopee
+audience: buyer
+category: return-evidence
+chunk_index: 3
+content preview: 2. Đã nhận được hàng, khiếu nại hàng có vấn đề (bể vỡ, sai mẫu, hàng lỗi, khác mô tả,...) Trong các trường hợp đã nhận hàng nhưng gặp vấn đề, Shopee khuyến khích bạn chuẩn bị bằng chứng là video mở kiện hàng. Video này sẽ là bằng chứng mạnh nhất để giải quyết khiếu nại của bạn. Video cần đảm bảo ...
+
+Gold rank before: 3
 Gold rank after: 1
 
 QUERY Q4
 query: Nếu TikTok Shop đưa ra quyết định có lợi cho khách hàng trong tranh chấp hậu mãi, người bán phải thực hiện hành động khắc phục trong bao lâu?
-Gold answer: Trong vòng 48 giờ sau khi nhận được thông báo.
+Gold answer: Người bán phải thực hiện biện pháp khắc phục trong vòng 48 giờ, chẳng hạn hoàn tiền hoặc thay sản phẩm, và chịu phí vận chuyển nếu có.
 Gold document: tiktok-aftersales-disputes
-Metadata filter: {'audience': 'seller'}
+Metadata filter: {'platform': 'tiktok_shop'}
+Evidence markers: ['48 giờ', 'hoàn tiền cho khách hàng hoặc đổi sản phẩm']
 
 TOP 1
 rank: 1
-score: 0.778723
+score: 0.829257
 doc_id: tiktok-aftersales-disputes
 title: Nâng cấp tranh chấp hậu mãi trên TikTok Shop
+platform: tiktok_shop
 audience: seller
 category: aftersales-dispute
-chunk_index: 16
-content preview: Tôi cần gửi loại tài liệu và giấy tờ hỗ trợ nào? Bước 2: Thông báo về kết quả xem xét Bước 3: Hành động khắc phục Câu hỏi thường gặp Thời hạn để khách hàng của tôi báo cáo vấn đề sau bán hàng đến TikTok Shop là khi nào? Nếu khách hàng rút lại yêu cầu, họ vẫn có thể gửi một yêu cầu khác để báo cáo...
+chunk_index: 9
+content preview: # Nâng cấp tranh chấp hậu mãi trên TikTok Shop Nếu chúng tôi đưa ra quyết định có lợi cho khách hàng, bạn phải thực hiện các hành động cần thiết để tuân thủ quyết định của chúng tôi trong vòng 48 giờ sau khi nhận được thông báo. Những hành động này có thể bao gồm hoàn tiền cho khách hàng hoặc đổi...
 
 TOP 2
 rank: 2
-score: 0.767825
-doc_id: tiktok-aftersales-disputes
-title: Nâng cấp tranh chấp hậu mãi trên TikTok Shop
+score: 0.801815
+doc_id: tiktok-seller-to-customer-returns
+title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
+platform: tiktok_shop
 audience: seller
-category: aftersales-dispute
+category: seller-return
 chunk_index: 10
-content preview: Thời hạn để khách hàng của tôi báo cáo vấn đề sau bán hàng đến TikTok Shop là khi nào? Chúng tôi quy định các thời hạn khác nhau, tùy theo tính chất khiếu nại của khách hàng: Sản phẩm không nhất quán với mô tả được niêm yết hoặc đơn hàng Trong vòng 6 ngày theo lịch sau khi trạng thái đơn hàng đượ...
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Bạn phải nộp các tài liệu của mình trong vòng 1 ngày làm việc để đủ điều kiện được hoàn phí. Điều gì xảy ra nếu tôi không tuân thủ? Nếu bạn không phản hồi hoặc không gửi trả lại mặt hàng đúng hạn, đây là những gì sẽ xảy ra: Vụ việc sẽ đư...
 
 TOP 3
 rank: 3
-score: 0.747665
-doc_id: tiktok-seller-to-customer-returns
-title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
-audience: seller
-category: seller-return
+score: 0.786334
+doc_id: tiktok-returns-refunds
+title: Chính sách trả hàng và hoàn tiền TikTok Shop
+platform: tiktok_shop
+audience: both
+category: return-refund
 chunk_index: 9
-content preview: Bạn phải nộp các tài liệu của mình trong vòng 1 ngày làm việc để đủ điều kiện được hoàn phí. Điều gì xảy ra nếu tôi không tuân thủ? Nếu bạn không phản hồi hoặc không gửi trả lại mặt hàng đúng hạn, đây là những gì sẽ xảy ra: Vụ việc sẽ được kết thúc theo hướng bất lợi cho bạn TikTok Shop sẽ phán q...
+content preview: # Chính sách trả hàng và hoàn tiền TikTok Shop Đối với trả hàng tự sắp xếp: Người bán có thể gửi khiếu nại trong vòng 15 ngày dương lịch kể từ ngày khách hàng gửi hàng trả về. Trả hàng sản phẩm Người mua phải tuân thủ các mốc thời gian sau, nếu không yêu cầu sẽ bị hủy. Lấy hàng: Ngày lấy hàng phả...
 
 gold rank: 1
 document_retrieval_score: 2
+gold evidence rank: 1
+evidence_retrieval_score: 2
 gold answer keyword clue found: True
-matched keywords: nhận, thông, trong, vòng, được
+matched keywords: chuyển, hiện, hoàn, hoặc, người, phải, phẩm, thực, tiền, trong, vòng
 
 A/B METADATA FILTER COMPARISON
 Unfiltered top-3:
 TOP 1
 rank: 1
-score: 0.778723
+score: 0.829257
 doc_id: tiktok-aftersales-disputes
 title: Nâng cấp tranh chấp hậu mãi trên TikTok Shop
+platform: tiktok_shop
 audience: seller
 category: aftersales-dispute
-chunk_index: 16
-content preview: Tôi cần gửi loại tài liệu và giấy tờ hỗ trợ nào? Bước 2: Thông báo về kết quả xem xét Bước 3: Hành động khắc phục Câu hỏi thường gặp Thời hạn để khách hàng của tôi báo cáo vấn đề sau bán hàng đến TikTok Shop là khi nào? Nếu khách hàng rút lại yêu cầu, họ vẫn có thể gửi một yêu cầu khác để báo cáo...
+chunk_index: 9
+content preview: # Nâng cấp tranh chấp hậu mãi trên TikTok Shop Nếu chúng tôi đưa ra quyết định có lợi cho khách hàng, bạn phải thực hiện các hành động cần thiết để tuân thủ quyết định của chúng tôi trong vòng 48 giờ sau khi nhận được thông báo. Những hành động này có thể bao gồm hoàn tiền cho khách hàng hoặc đổi...
 
 TOP 2
 rank: 2
-score: 0.767825
-doc_id: tiktok-aftersales-disputes
-title: Nâng cấp tranh chấp hậu mãi trên TikTok Shop
+score: 0.801815
+doc_id: tiktok-seller-to-customer-returns
+title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
+platform: tiktok_shop
 audience: seller
-category: aftersales-dispute
+category: seller-return
 chunk_index: 10
-content preview: Thời hạn để khách hàng của tôi báo cáo vấn đề sau bán hàng đến TikTok Shop là khi nào? Chúng tôi quy định các thời hạn khác nhau, tùy theo tính chất khiếu nại của khách hàng: Sản phẩm không nhất quán với mô tả được niêm yết hoặc đơn hàng Trong vòng 6 ngày theo lịch sau khi trạng thái đơn hàng đượ...
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Bạn phải nộp các tài liệu của mình trong vòng 1 ngày làm việc để đủ điều kiện được hoàn phí. Điều gì xảy ra nếu tôi không tuân thủ? Nếu bạn không phản hồi hoặc không gửi trả lại mặt hàng đúng hạn, đây là những gì sẽ xảy ra: Vụ việc sẽ đư...
 
 TOP 3
 rank: 3
-score: 0.747665
-doc_id: tiktok-seller-to-customer-returns
-title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
-audience: seller
-category: seller-return
+score: 0.786334
+doc_id: tiktok-returns-refunds
+title: Chính sách trả hàng và hoàn tiền TikTok Shop
+platform: tiktok_shop
+audience: both
+category: return-refund
 chunk_index: 9
-content preview: Bạn phải nộp các tài liệu của mình trong vòng 1 ngày làm việc để đủ điều kiện được hoàn phí. Điều gì xảy ra nếu tôi không tuân thủ? Nếu bạn không phản hồi hoặc không gửi trả lại mặt hàng đúng hạn, đây là những gì sẽ xảy ra: Vụ việc sẽ được kết thúc theo hướng bất lợi cho bạn TikTok Shop sẽ phán q...
+content preview: # Chính sách trả hàng và hoàn tiền TikTok Shop Đối với trả hàng tự sắp xếp: Người bán có thể gửi khiếu nại trong vòng 15 ngày dương lịch kể từ ngày khách hàng gửi hàng trả về. Trả hàng sản phẩm Người mua phải tuân thủ các mốc thời gian sau, nếu không yêu cầu sẽ bị hủy. Lấy hàng: Ngày lấy hàng phả...
 
 Filtered top-3:
 TOP 1
 rank: 1
-score: 0.778723
+score: 0.829257
 doc_id: tiktok-aftersales-disputes
 title: Nâng cấp tranh chấp hậu mãi trên TikTok Shop
+platform: tiktok_shop
 audience: seller
 category: aftersales-dispute
-chunk_index: 16
-content preview: Tôi cần gửi loại tài liệu và giấy tờ hỗ trợ nào? Bước 2: Thông báo về kết quả xem xét Bước 3: Hành động khắc phục Câu hỏi thường gặp Thời hạn để khách hàng của tôi báo cáo vấn đề sau bán hàng đến TikTok Shop là khi nào? Nếu khách hàng rút lại yêu cầu, họ vẫn có thể gửi một yêu cầu khác để báo cáo...
+chunk_index: 9
+content preview: # Nâng cấp tranh chấp hậu mãi trên TikTok Shop Nếu chúng tôi đưa ra quyết định có lợi cho khách hàng, bạn phải thực hiện các hành động cần thiết để tuân thủ quyết định của chúng tôi trong vòng 48 giờ sau khi nhận được thông báo. Những hành động này có thể bao gồm hoàn tiền cho khách hàng hoặc đổi...
 
 TOP 2
 rank: 2
-score: 0.767825
-doc_id: tiktok-aftersales-disputes
-title: Nâng cấp tranh chấp hậu mãi trên TikTok Shop
+score: 0.801815
+doc_id: tiktok-seller-to-customer-returns
+title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
+platform: tiktok_shop
 audience: seller
-category: aftersales-dispute
+category: seller-return
 chunk_index: 10
-content preview: Thời hạn để khách hàng của tôi báo cáo vấn đề sau bán hàng đến TikTok Shop là khi nào? Chúng tôi quy định các thời hạn khác nhau, tùy theo tính chất khiếu nại của khách hàng: Sản phẩm không nhất quán với mô tả được niêm yết hoặc đơn hàng Trong vòng 6 ngày theo lịch sau khi trạng thái đơn hàng đượ...
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Bạn phải nộp các tài liệu của mình trong vòng 1 ngày làm việc để đủ điều kiện được hoàn phí. Điều gì xảy ra nếu tôi không tuân thủ? Nếu bạn không phản hồi hoặc không gửi trả lại mặt hàng đúng hạn, đây là những gì sẽ xảy ra: Vụ việc sẽ đư...
 
 TOP 3
 rank: 3
-score: 0.747665
-doc_id: tiktok-seller-to-customer-returns
-title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
-audience: seller
-category: seller-return
+score: 0.786334
+doc_id: tiktok-returns-refunds
+title: Chính sách trả hàng và hoàn tiền TikTok Shop
+platform: tiktok_shop
+audience: both
+category: return-refund
 chunk_index: 9
-content preview: Bạn phải nộp các tài liệu của mình trong vòng 1 ngày làm việc để đủ điều kiện được hoàn phí. Điều gì xảy ra nếu tôi không tuân thủ? Nếu bạn không phản hồi hoặc không gửi trả lại mặt hàng đúng hạn, đây là những gì sẽ xảy ra: Vụ việc sẽ được kết thúc theo hướng bất lợi cho bạn TikTok Shop sẽ phán q...
+content preview: # Chính sách trả hàng và hoàn tiền TikTok Shop Đối với trả hàng tự sắp xếp: Người bán có thể gửi khiếu nại trong vòng 15 ngày dương lịch kể từ ngày khách hàng gửi hàng trả về. Trả hàng sản phẩm Người mua phải tuân thủ các mốc thời gian sau, nếu không yêu cầu sẽ bị hủy. Lấy hàng: Ngày lấy hàng phả...
 
 Gold rank before: 1
 Gold rank after: 1
 
 QUERY Q5
-query: Khi người mua Shopee nhận sản phẩm bị lỗi hoặc khác mô tả, bằng chứng nào nên được chuẩn bị để hỗ trợ yêu cầu trả hàng hoặc hoàn tiền?
-Gold answer: Nên chuẩn bị video mở kiện hàng quay liên tục, rõ ràng, thể hiện tình trạng kiện hàng, mã vận đơn, quá trình mở kiện và tình trạng sản phẩm.
-Gold document: shopee-return-evidence
-Metadata filter: {'audience': 'buyer'}
+query: Sau khi nhân viên chăm sóc khách hàng TikTok Shop liên hệ, người bán có bao lâu và phải làm gì để gửi trả sản phẩm cho người mua?
+Gold answer: Người bán có 1 ngày làm việc để đóng gói an toàn, gắn nhãn vận chuyển và gửi qua đơn vị vận chuyển tiết kiệm có cung cấp mã theo dõi.
+Gold document: tiktok-seller-to-customer-returns
+Metadata filter: {'audience': 'seller'}
+Evidence markers: ['1 ngày làm việc', 'mã vận đơn']
 
 TOP 1
 rank: 1
-score: 0.758501
-doc_id: tiktok-change-of-mind
-title: Trả hàng do đổi ý trên TikTok Shop
-audience: buyer
-category: change-of-mind
-chunk_index: 20
-content preview: ก่อนหน้าTrả hàng và Hoàn tiềnBerikutnya Báo cáo tranh chấp sau bán hàng สารบัญ Trả hàng do “Đổi ý” Tôi nên làm gì khi khách hàng gửi yêu cầu trả hàng vì "Đổi ý"? Từ chối trả hàng không hợp lệ Sản phẩm phải đáp ứng những tiêu chí nào để đủ điều kiện trả hàng theo “Đổi ý”? Những sản phẩm nào không ...
+score: 0.850666
+doc_id: tiktok-seller-to-customer-returns
+title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
+platform: tiktok_shop
+audience: seller
+category: seller-return
+chunk_index: 6
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Vận chuyển tiết kiệmSau khi bạn đã gửi trả hàng và yêu cầu hậu mãi được đóng lại, khoản hoàn tiền đủ điều kiện thường sẽ được ghi có trong vòng 14 ngày.Chuyển phát cao cấpNếu bạn chọn dịch vụ chuyển phát cao cấp (ví dụ: DHL, FedEx), bạn ...
 
 TOP 2
 rank: 2
-score: 0.743003
-doc_id: tiktok-change-of-mind
-title: Trả hàng do đổi ý trên TikTok Shop
-audience: buyer
-category: change-of-mind
-chunk_index: 3
-content preview: Khi hàng được trả lại: Sản phẩm không đáp ứng tiêu chí trả hàng. Từ chối trả hàng không hợp lệ Người bán không được từ chối trả hàng một cách vô lý, bao gồm nhưng không giới hạn ở các trường hợp sau: Áp dụng sai điều kiện trả hàng do “Đổi ý” bằng cách sử dụng các tiêu chí ngoài danh sách không đủ...
+score: 0.848758
+doc_id: tiktok-seller-to-customer-returns
+title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
+platform: tiktok_shop
+audience: seller
+category: seller-return
+chunk_index: 10
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Bạn phải nộp các tài liệu của mình trong vòng 1 ngày làm việc để đủ điều kiện được hoàn phí. Điều gì xảy ra nếu tôi không tuân thủ? Nếu bạn không phản hồi hoặc không gửi trả lại mặt hàng đúng hạn, đây là những gì sẽ xảy ra: Vụ việc sẽ đư...
 
 TOP 3
 rank: 3
-score: 0.727227
-doc_id: shopee-return-evidence
-title: Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền Shopee
-audience: buyer
-category: return-evidence
-chunk_index: 1
-content preview: Khi bạn cần gửi yêu cầu Trả hàng/Hoàn tiền trên Shopee, việc cung cấp đầy đủ và chính xác bằng chứng là rất quan trọng để đảm bảo yêu cầu của bạn được xử lý nhanh chóng. Tùy thuộc vào từng trường hợp, loại bằng chứng bạn cần chuẩn bị sẽ khác nhau. 1. Khiếu nại chưa nhận được hàng Nếu bạn chưa nhậ...
+score: 0.848337
+doc_id: tiktok-seller-to-customer-returns
+title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
+platform: tiktok_shop
+audience: seller
+category: seller-return
+chunk_index: 5
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Sau khi nhân viên dịch vụ khách hàng liên hệ với bạn, đây là những việc bạn cần làm trong vòng 1 ngày làm việc:1. Đóng gói mặt hàng cẩn thận – Đảm bảo mặt hàng được đóng gói chắc chắn. Dán nhãn vận chuyển (Vận đơn hàng không) ở bên ngoài...
 
-gold rank: 3
-document_retrieval_score: 1
+gold rank: 1
+document_retrieval_score: 2
+gold evidence rank: 3
+evidence_retrieval_score: 1
 gold answer keyword clue found: True
-matched keywords: chuẩn, hàng, kiện, phẩm
+matched keywords: chuyển, cung, kiệm, ngày, người, nhãn, theo, tiết, việc, đóng
 
 A/B METADATA FILTER COMPARISON
 Unfiltered top-3:
 TOP 1
 rank: 1
-score: 0.791119
-doc_id: shopee-request-processing
-title: Quy trình Shopee xử lý yêu cầu trả hàng và hoàn tiền
+score: 0.851043
+doc_id: tiktok-returns-refunds
+title: Chính sách trả hàng và hoàn tiền TikTok Shop
+platform: tiktok_shop
 audience: both
-category: return-process
-chunk_index: 7
-content preview: Shopee sẽ kiểm tra tình trạng hàng hoàn trả dựa trên lý do của yêu cầu Trả hàng/Hoàn tiền và những bằng chứng được cung cấp. Chi tiết các điều kiện tham khảo dưới đây: Lý do khiếu nại Điều kiện áp dụng Lưu ý Chưa sử dụng Chưa mở hộp Còn đầy đủ phụ kiện kèm theo Không bể, vỡ Còn giấy bảo hành của ...
+category: return-refund
+chunk_index: 55
+content preview: # Chính sách trả hàng và hoàn tiền TikTok Shop Khách hàng của tôi có bao lâu để vận chuyển sản phẩm trả hàng? Trong trường hợp nào tôi phải chịu chi phí vận chuyển trả hàng của khách hàng?
 
 TOP 2
 rank: 2
-score: 0.776854
-doc_id: shopee-return-refund-policy
-title: Chính sách trả hàng và hoàn tiền Shopee
-audience: both
-category: return-refund
-chunk_index: 46
-content preview: Trường hợp Shopee nhận được khiếu nại từ Người Mua vì lý do Người Bán hoàn tiền thấp hơn 50% giá trị của Sản Phẩm Hoàn Trả thì Shopee, tại bất kỳ thời điểm nào, có quyền cấn trừ từ Số Dư Tài Khoản Shopee của Người Bán đó số tiền chênh lệch (được xác định bằng 100% giá trị Sản Phẩm Hoàn Trả trừ đi...
+score: 0.850666
+doc_id: tiktok-seller-to-customer-returns
+title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
+platform: tiktok_shop
+audience: seller
+category: seller-return
+chunk_index: 6
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Vận chuyển tiết kiệmSau khi bạn đã gửi trả hàng và yêu cầu hậu mãi được đóng lại, khoản hoàn tiền đủ điều kiện thường sẽ được ghi có trong vòng 14 ngày.Chuyển phát cao cấpNếu bạn chọn dịch vụ chuyển phát cao cấp (ví dụ: DHL, FedEx), bạn ...
 
 TOP 3
 rank: 3
-score: 0.768994
-doc_id: shopee-return-refund-policy
-title: Chính sách trả hàng và hoàn tiền Shopee
-audience: both
-category: return-refund
-chunk_index: 7
-content preview: Người Mua đã thanh toán bằng các phương thức thanh toán hợp lệ và trực tiếp trên Trang Shopee nhưng (i) không nhận được Sản Phẩm, hoặc (ii) không nhận được toàn bộ các Sản Phẩm đã đặt, hoặc (iii) nhận được Sản Phẩm là hàng giả, hàng nhái; Sản Phẩm bị lỗi hoặc bị hư hại trong quá trình vận chuyển;...
+score: 0.848758
+doc_id: tiktok-seller-to-customer-returns
+title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
+platform: tiktok_shop
+audience: seller
+category: seller-return
+chunk_index: 10
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Bạn phải nộp các tài liệu của mình trong vòng 1 ngày làm việc để đủ điều kiện được hoàn phí. Điều gì xảy ra nếu tôi không tuân thủ? Nếu bạn không phản hồi hoặc không gửi trả lại mặt hàng đúng hạn, đây là những gì sẽ xảy ra: Vụ việc sẽ đư...
 
 Filtered top-3:
 TOP 1
 rank: 1
-score: 0.758501
-doc_id: tiktok-change-of-mind
-title: Trả hàng do đổi ý trên TikTok Shop
-audience: buyer
-category: change-of-mind
-chunk_index: 20
-content preview: ก่อนหน้าTrả hàng và Hoàn tiềnBerikutnya Báo cáo tranh chấp sau bán hàng สารบัญ Trả hàng do “Đổi ý” Tôi nên làm gì khi khách hàng gửi yêu cầu trả hàng vì "Đổi ý"? Từ chối trả hàng không hợp lệ Sản phẩm phải đáp ứng những tiêu chí nào để đủ điều kiện trả hàng theo “Đổi ý”? Những sản phẩm nào không ...
+score: 0.850666
+doc_id: tiktok-seller-to-customer-returns
+title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
+platform: tiktok_shop
+audience: seller
+category: seller-return
+chunk_index: 6
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Vận chuyển tiết kiệmSau khi bạn đã gửi trả hàng và yêu cầu hậu mãi được đóng lại, khoản hoàn tiền đủ điều kiện thường sẽ được ghi có trong vòng 14 ngày.Chuyển phát cao cấpNếu bạn chọn dịch vụ chuyển phát cao cấp (ví dụ: DHL, FedEx), bạn ...
 
 TOP 2
 rank: 2
-score: 0.743003
-doc_id: tiktok-change-of-mind
-title: Trả hàng do đổi ý trên TikTok Shop
-audience: buyer
-category: change-of-mind
-chunk_index: 3
-content preview: Khi hàng được trả lại: Sản phẩm không đáp ứng tiêu chí trả hàng. Từ chối trả hàng không hợp lệ Người bán không được từ chối trả hàng một cách vô lý, bao gồm nhưng không giới hạn ở các trường hợp sau: Áp dụng sai điều kiện trả hàng do “Đổi ý” bằng cách sử dụng các tiêu chí ngoài danh sách không đủ...
+score: 0.848758
+doc_id: tiktok-seller-to-customer-returns
+title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
+platform: tiktok_shop
+audience: seller
+category: seller-return
+chunk_index: 10
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Bạn phải nộp các tài liệu của mình trong vòng 1 ngày làm việc để đủ điều kiện được hoàn phí. Điều gì xảy ra nếu tôi không tuân thủ? Nếu bạn không phản hồi hoặc không gửi trả lại mặt hàng đúng hạn, đây là những gì sẽ xảy ra: Vụ việc sẽ đư...
 
 TOP 3
 rank: 3
-score: 0.727227
-doc_id: shopee-return-evidence
-title: Chuẩn bị bằng chứng khi yêu cầu trả hàng và hoàn tiền Shopee
-audience: buyer
-category: return-evidence
-chunk_index: 1
-content preview: Khi bạn cần gửi yêu cầu Trả hàng/Hoàn tiền trên Shopee, việc cung cấp đầy đủ và chính xác bằng chứng là rất quan trọng để đảm bảo yêu cầu của bạn được xử lý nhanh chóng. Tùy thuộc vào từng trường hợp, loại bằng chứng bạn cần chuẩn bị sẽ khác nhau. 1. Khiếu nại chưa nhận được hàng Nếu bạn chưa nhậ...
+score: 0.848337
+doc_id: tiktok-seller-to-customer-returns
+title: Người bán gửi trả sản phẩm cho người mua trên TikTok Shop
+platform: tiktok_shop
+audience: seller
+category: seller-return
+chunk_index: 5
+content preview: # Người bán gửi trả sản phẩm cho người mua trên TikTok Shop Sau khi nhân viên dịch vụ khách hàng liên hệ với bạn, đây là những việc bạn cần làm trong vòng 1 ngày làm việc:1. Đóng gói mặt hàng cẩn thận – Đảm bảo mặt hàng được đóng gói chắc chắn. Dán nhãn vận chuyển (Vận đơn hàng không) ở bên ngoài...
 
-Gold rank before: not found
-Gold rank after: 3
+Gold rank before: 2
+Gold rank after: 1
 
 SUMMARY
 Questions: 5
 Gold@1: 4/5
-Gold@3: 5/5
-Document retrieval score: 9/10
-Document retrieval score is a retrieval-only metric, not the final lab score.
+Gold@3: 4/5
+Document retrieval score: 8/10
+Evidence@1: 1/5
+Evidence@3: 3/5
+Evidence retrieval score: 4/10
+Document and evidence retrieval are separate metrics; evidence is stricter.

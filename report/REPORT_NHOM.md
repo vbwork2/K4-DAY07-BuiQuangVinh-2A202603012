@@ -62,6 +62,21 @@ Các số liệu dưới đây lấy từ local run trong `ket_qua_benchmark_rec
 
 `HeadingRecursiveChunker` đã được thêm như một strategy section-aware: heading Markdown hoặc section đánh số được đưa vào mọi child chunk của section dài. Mapping giữa strategy và từng thành viên chưa có dữ liệu, nên không tự gán tên hoặc điểm cho thành viên.
 
+### Chiến lược của Bùi Quang Vinh — HeadingRecursiveChunker
+
+Chiến lược của Bùi Quang Vinh là **Heading/Section-aware Recursive Chunking** với `chunk_size=500`. Strategy nhận diện Markdown headings và numbered sections; section nhỏ giữ heading cùng body, còn section lớn dùng `RecursiveChunker` cho body và prepend heading vào từng child chunk. Cách này giữ ngữ cảnh semantic của section policy và phù hợp với corpus ecommerce thường chia theo điều kiện, quy trình, bước xử lý, thời hạn và trường hợp ngoại lệ.
+
+Kết quả local embedding thực tế trong `benchmark_evidence_all.txt`:
+
+| Strategy | Chunks | Document@1 | Document@3 | Evidence@1 | Evidence@3 | Score |
+|---|---:|---:|---:|---:|---:|---:|
+| Fixed | 177 | 3/5 | 3/5 | 0/5 | 0/5 | 0/10 |
+| Sentence | 157 | 2/5 | 3/5 | 0/5 | 0/5 | 0/10 |
+| Recursive | 197 | 2/5 | 3/5 | 0/5 | 1/5 | 1/10 |
+| HeadingRecursiveChunker | 232 | 4/5 | 4/5 | 1/5 | 3/5 | 4/10 |
+
+Trong benchmark này, Heading đạt các chỉ số nêu trên; bảng không suy diễn rằng strategy này sẽ luôn tốt nhất ngoài corpus và query hiện tại.
+
 ## 3. Câu hỏi đánh giá
 
 | # | Query | Gold answer (tóm tắt) | Gold document / evidence |

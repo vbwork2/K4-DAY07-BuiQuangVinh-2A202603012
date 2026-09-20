@@ -4,6 +4,7 @@ title: "Người bán gửi trả sản phẩm cho người mua trên TikTok Sho
 source_url: "https://seller-vn.tiktok.com/university/essay?knowledge_id=4041059496167184"
 retrieved_at: "2026-09-20"
 document_version: "2026-08-20"
+platform: "tiktok_shop"
 audience: "seller"
 category: "seller-return"
 language: "vi"
